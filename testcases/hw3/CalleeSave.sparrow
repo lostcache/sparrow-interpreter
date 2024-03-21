@@ -1,0 +1,196 @@
+func Main()
+ret0=0
+kcvar0=4
+kcvar1=12
+kcvar2=alloc(kcvar0)
+kcvar3=alloc(kcvar1)
+kcvar4=kcvar3
+[kcvar2+0] = kcvar4
+kcvar5=@Astart
+[kcvar3+0]=kcvar5
+kcvar6=@Afibo
+[kcvar3+4]=kcvar6
+kcvar7=@Aprint1
+[kcvar3+8]=kcvar7
+if0 kcvar2 goto null_func
+kcvar8=[kcvar2+0]
+kcvar9=[kcvar8+0]
+kcvar10=call kcvar9(kcvar2 )
+print(kcvar10)
+goto Main_end
+null_arr:
+error("array index out of bounds")
+null_func:
+error("null pointer")
+Main_end:
+return ret0
+func Astart(this )
+fibonum=0
+elements=0
+count1=0
+count2=0
+count3=0
+kcvar11=10
+elements=kcvar11
+if0 this goto null_func
+kcvar12=[this+0]
+kcvar13=[kcvar12+4]
+kcvar14=call kcvar13(this elements)
+fibonum=kcvar14
+if0 this goto null_func
+kcvar15=[this+0]
+kcvar16=[kcvar15+8]
+kcvar17=call kcvar16(this fibonum)
+count3=kcvar17
+kcvar18=fibonum+count3
+fibonum=kcvar18
+kcvar19=0
+count1=kcvar19
+loop_label_kcvar20:
+kcvar22=count1<elements
+if0 kcvar22 goto loop_label_kcvar21
+kcvar23=0
+count2=kcvar23
+loop_label_kcvar24:
+kcvar26=count2<count1
+if0 kcvar26 goto loop_label_kcvar25
+print(count2)
+kcvar27=1
+kcvar28=count2+kcvar27
+count2=kcvar28
+goto loop_label_kcvar24
+loop_label_kcvar25:
+kcvar29=1
+kcvar30=count1+kcvar29
+count1=kcvar30
+goto loop_label_kcvar20
+loop_label_kcvar21:
+kcvar31=1
+fibonum=kcvar31
+kcvar32=0
+count1=kcvar32
+kcvar33=1
+count2=kcvar33
+loop_label_kcvar34:
+kcvar36=count1<elements
+if0 kcvar36 goto loop_label_kcvar35
+kcvar37=1
+kcvar38=fibonum+kcvar37
+fibonum=kcvar38
+kcvar39=fibonum*fibonum
+fibonum=kcvar39
+kcvar42=1000
+kcvar43=fibonum<kcvar42
+if0 kcvar43 goto label_kcvar40
+kcvar44=2
+kcvar45=fibonum+kcvar44
+fibonum=kcvar45
+goto label_kcvar41
+label_kcvar40:
+kcvar46=1
+kcvar47=fibonum+kcvar46
+fibonum=kcvar47
+label_kcvar41:
+loop_label_kcvar48:
+kcvar50=10000
+kcvar51=count2<kcvar50
+if0 kcvar51 goto loop_label_kcvar49
+kcvar52=count2+count2
+count2=kcvar52
+goto loop_label_kcvar48
+loop_label_kcvar49:
+kcvar53=1
+kcvar54=count1+kcvar53
+count1=kcvar54
+goto loop_label_kcvar34
+loop_label_kcvar35:
+kcvar55=fibonum-count2
+fibonum=kcvar55
+goto Astart_end
+null_arr:
+error("array index out of bounds")
+null_func:
+error("null pointer")
+Astart_end:
+return fibonum
+func Afibo(this n)
+n1=0
+n2=0
+temp1=0
+temp2=0
+ret=0
+kcvar56=1
+kcvar57=n-kcvar56
+n1=kcvar57
+kcvar58=2
+kcvar59=n-kcvar58
+n2=kcvar59
+kcvar60=0
+ret=kcvar60
+kcvar63=1
+kcvar64=n<kcvar63
+if0 kcvar64 goto label_kcvar61
+kcvar65=1
+ret=kcvar65
+goto label_kcvar62
+label_kcvar61:
+kcvar68=2
+kcvar69=n<kcvar68
+if0 kcvar69 goto label_kcvar66
+kcvar70=1
+ret=kcvar70
+goto label_kcvar67
+label_kcvar66:
+if0 this goto null_func
+kcvar71=[this+0]
+kcvar72=[kcvar71+4]
+kcvar73=call kcvar72(this n1)
+temp1=kcvar73
+if0 this goto null_func
+kcvar74=[this+0]
+kcvar75=[kcvar74+4]
+kcvar76=call kcvar75(this n2)
+temp2=kcvar76
+kcvar77=temp1+temp2
+ret=kcvar77
+label_kcvar67:
+label_kcvar62:
+goto Afibo_end
+null_arr:
+error("array index out of bounds")
+null_func:
+error("null pointer")
+Afibo_end:
+return ret
+func Aprint1(this n)
+ret=0
+n1=0
+temp1=0
+kcvar78=0
+ret=kcvar78
+kcvar81=0
+kcvar82=n<kcvar81
+if0 kcvar82 goto label_kcvar79
+kcvar83=0
+ret=kcvar83
+goto label_kcvar80
+label_kcvar79:
+kcvar84=1
+kcvar85=n-kcvar84
+n1=kcvar85
+if0 this goto null_func
+kcvar86=[this+0]
+kcvar87=[kcvar86+8]
+kcvar88=call kcvar87(this n1)
+temp1=kcvar88
+print(temp1)
+kcvar89=n+temp1
+ret=kcvar89
+label_kcvar80:
+goto Aprint1_end
+null_arr:
+error("array index out of bounds")
+null_func:
+error("null pointer")
+Aprint1_end:
+return ret
