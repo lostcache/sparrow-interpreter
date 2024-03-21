@@ -1,3 +1,4 @@
 results
 *.gradle
 build
+*.class
