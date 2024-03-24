@@ -2,3 +2,6 @@ results
 *.gradle
 build
 *.class
+test
+testcases/hw1
+testcases/hw2
