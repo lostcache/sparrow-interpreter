@@ -174,7 +174,8 @@ public class Executor extends GJDepthFirst<Object, Heap> {
   public Object visit(ErrorMessage n, Heap heap) {
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String errMessage = (String) n.f2.accept(this, heap);
+    // this.exitProgramWithErrorMessage(errMessage);
     n.f3.accept(this, heap);
     return null;
   }
@@ -255,4 +256,10 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     memBlock.addMemoryUnit(memUnit);
     heap.addVarToScope(this.currentFunction, varName, memBlock);
   }
+
+  private void exitProgramWithErrorMessage(String message) {
+    Log.log(message);
+    System.exit(0);
+  }
+
 }
