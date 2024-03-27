@@ -64,10 +64,11 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> "@" f3 -> FunctionName() */
   public Object visit(SetFuncName n, Heap heap) {
-    n.f0.accept(this, heap);
+    String varName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
-    n.f3.accept(this, heap);
+    String funName = (String) n.f3.accept(this, heap);
+    this.putVarInMemory(heap, varName, new MemoryUnit(funName, VariableType.FUNCTION));
     return null;
   }
 
