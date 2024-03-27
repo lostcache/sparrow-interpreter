@@ -4,9 +4,6 @@ class MemoryUnit {
   private VariableType type;
 
   public MemoryUnit(String valueImage, VariableType type) {
-    if (valueImage.length() == 0) {
-      Failure.failWithMessage("value image cannot be empty string");
-    }
     this.valueImage = valueImage;
     this.type = type;
   }
@@ -36,6 +33,10 @@ class MemoryUnit {
 
   public VariableType getType() {
     return this.type;
+  }
+
+  public boolean isEmpty() {
+    return this.valueImage.length() == 0 && this.type == VariableType.NULL;
   }
 
   private void unexpectedError(String message) {
