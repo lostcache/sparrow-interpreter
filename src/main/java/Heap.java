@@ -15,19 +15,36 @@ public class Heap {
     this.functionInstructions.put(functionName, instructions);
   }
 
+  public void createNewFunctionScope(String functionName) {
+    memory.put(functionName, new Scope());
+  }
+
+  public void addVarToScope(String functionName, String varName, MemoryBlock memBlock) {
+    Scope scope = this.getScopeMemory(functionName);
+    scope.addVar(varName, memBlock);
+  }
+
   public void debugInstructions() {
-    this.log(this.functionInstructions.keySet());
+    Log.log(this.functionInstructions.keySet());
     for (String functionName : this.functionInstructions.keySet()) {
       List<LabelledInstructions> instructions = this.functionInstructions.get(functionName);
-      this.log("function-> " + functionName);
-      this.log("total->" + instructions.size() + "instructions-> " + instructions);
+      Log.log("function-> " + functionName);
+      Log.log("total->" + instructions.size() + "instructions-> " + instructions);
       for (LabelledInstructions instruction : instructions) {
-        this.log("Label -> " + instruction.getLabel() + " Instr -> " + instruction.toString());
+        Log.log("Label -> " + instruction.getLabel() + " Instr -> " + instruction.toString());
       }
     }
   }
 
-  private void log(Object message) {
-    System.out.println(message);
+  public void debugMemory() {
+    for (String functionName : this.memory.keySet()) {
+      Log.log("current scope name -> " + functionName);
+      Scope scope = this.getScopeMemory(functionName);
+      scope.debugScopeMemory();
+    }
+  }
+
+  private Scope getScopeMemory(String functionName) {
+    return this.memory.get(functionName);
   }
 }

@@ -13,16 +13,18 @@ public class Interpreter {
     new SparrowParser(in);
     Node root = SparrowParser.Program();
 
-    // initialize heap
+    // init heap
     Heap heap = new Heap();
 
-    LabelledInstructions labelledInstructions = new LabelledInstructions();
-
     LabelledInstructionGatherer labelledInstructionGatherer = new LabelledInstructionGatherer();
-
     // collect all the labelled instructions in the first pass to implement goto.
-    root.accept(labelledInstructionGatherer, labelledInstructions);
+    root.accept(labelledInstructionGatherer, heap);
 
-    if (debug) labelledInstructions.debug();
+    // init executor
+    Executor exec = new Executor();
+    root.accept(exec, heap);
+
+    // if (debug) heap.debugInstructions();
+    if (debug) heap.debugMemory();
   }
 }

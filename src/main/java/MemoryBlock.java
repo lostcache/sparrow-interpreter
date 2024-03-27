@@ -2,15 +2,17 @@ import java.util.*;
 
 class MemoryBlock {
   private List<MemoryUnit> memoryUnits;
-  private int size;
 
-  public MemoryBlock(int size) {
-    this.size = size;
-    this.memoryUnits = new ArrayList<MemoryUnit>(size);
+  public MemoryBlock() {
+    this.memoryUnits = new ArrayList<MemoryUnit>();
   }
 
   public void updateMemoryUnit(int index, MemoryUnit unit) {
     this.memoryUnits.set(index, unit);
+  }
+
+  public void addMemoryUnit(MemoryUnit memUnit) {
+    this.memoryUnits.add(memUnit);
   }
 
   public String getValueImage(int index) {
@@ -38,7 +40,15 @@ class MemoryBlock {
   }
 
   public int getBlockSize() {
-    return this.size;
+    return this.memoryUnits.size();
+  }
+
+  public String getValueImageOfMemUnits() {
+    String returnString = new String();
+    for (MemoryUnit memUnit : this.memoryUnits) {
+      returnString += memUnit.getValueImage() + ", ";
+    }
+    return returnString;
   }
 
   // private/helper methods

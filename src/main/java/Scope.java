@@ -7,16 +7,23 @@ class Scope {
     this.scopeMemory = new HashMap<String, MemoryBlock>();
   }
 
-  public void addToMemory(String varName, MemoryBlock memBlock) {
-    this.scopeMemory.put(varName, memBlock);
-  }
-
   public void updateVarInMemory(String varName, MemoryBlock memBlock) {
     if (!isExistingBlockSizeSame(varName, memBlock.getBlockSize())) {
       this.exitBecauseOfUnexpectedBehaviour(
-          "Memory block size does not match aka segmentation fault?");
+          "Memory block size does not match aka segmentation fault");
     }
     this.scopeMemory.put(varName, memBlock);
+  }
+
+  public void addVar(String varName, MemoryBlock memBlock) {
+    this.scopeMemory.put(varName, memBlock);
+  }
+
+  public void debugScopeMemory() {
+    for (String varName : this.scopeMemory.keySet()) {
+      MemoryBlock block = this.getMemoryBlockByVarName(varName);
+      Log.log(varName + " -> " + block.getValueImageOfMemUnits());
+    }
   }
 
   // private/helper methods
