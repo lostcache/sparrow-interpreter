@@ -21,6 +21,11 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     this.updateCurrentFunction(functionName);
     heap.createNewFunctionScope(functionName);
     n.f2.accept(this, heap);
+    List<Node> paramList = n.f3.nodes;
+    for (Node param : paramList) {
+      String paramName = (String) param.accept(this, heap);
+      Log.log("param -> " + paramName);
+    }
     n.f3.accept(this, heap);
     n.f4.accept(this, heap);
     n.f5.accept(this, heap);
@@ -74,41 +79,58 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "+" f4 -> Identifier() */
   public Object visit(Add n, Heap heap) {
-    n.f0.accept(this, heap);
+    String resultVar = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String operand1 = (String) n.f2.accept(this, heap);
     n.f3.accept(this, heap);
-    n.f4.accept(this, heap);
+    String operand2 = (String) n.f4.accept(this, heap);
+    MemoryUnit operandUnit1 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand1);
+    MemoryUnit operandUnit2 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand2);
+    String resultImage = this.addIntMemoryUnitsAndReturnResult(operandUnit1, operandUnit2);
+    this.putVarInMemory(heap, resultVar, new MemoryUnit(resultImage, VariableType.INTEGER));
     return null;
   }
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "-" f4 -> Identifier() */
   public Object visit(Subtract n, Heap heap) {
-    n.f0.accept(this, heap);
+    String varAssignName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String operand1 = (String) n.f2.accept(this, heap);
     n.f3.accept(this, heap);
-    n.f4.accept(this, heap);
+    String operand2 = (String) n.f4.accept(this, heap);
+    MemoryUnit operandUnit1 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand1);
+    MemoryUnit operandUnit2 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand2);
+    String resultImage = this.subtractIntMemroyUnitAndReturnResult(operandUnit1, operandUnit2);
+    this.putVarInMemory(heap, varAssignName, new MemoryUnit(resultImage, VariableType.INTEGER));
     return null;
   }
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "*" f4 -> Identifier() */
   public Object visit(Multiply n, Heap heap) {
-    n.f0.accept(this, heap);
+    String varAssignName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String operand1 = (String) n.f2.accept(this, heap);
     n.f3.accept(this, heap);
-    n.f4.accept(this, heap);
+    String operand2 = (String) n.f4.accept(this, heap);
+    MemoryUnit operandUnit1 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand1);
+    MemoryUnit operandUnit2 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand2);
+    String resultImage = this.multiplyIntMemroyUnitAndReturnResult(operandUnit1, operandUnit2);
+    this.putVarInMemory(heap, varAssignName, new MemoryUnit(resultImage, VariableType.INTEGER));
     return null;
   }
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "<" f4 -> Identifier() */
   public Object visit(LessThan n, Heap heap) {
-    n.f0.accept(this, heap);
+    String varAssignName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String operand1 = (String) n.f2.accept(this, heap);
     n.f3.accept(this, heap);
-    n.f4.accept(this, heap);
+    String operand2 = (String) n.f4.accept(this, heap);
+    MemoryUnit operandUnit1 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand1);
+    MemoryUnit operandUnit2 = this.getMemoryUnitFromScope(heap, this.currentFunction, operand2);
+    int result = this.lessThanOppOnIntMemroyUnitAndReturnResult(operandUnit1, operandUnit2);
+    String resultImage = String.valueOf(result);
+    this.putVarInMemory(heap, varAssignName, new MemoryUnit(resultImage, VariableType.INTEGER));
     return null;
   }
 
@@ -204,9 +226,11 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
-    n.f3.accept(this, heap);
+    String calledVarName = (String) n.f3.accept(this, heap);
+    // MemoryUnit calledMemUnit =
+    //     this.getMemoryUnitFromScope(heap, this.currentFunction, calledVarName);
     n.f4.accept(this, heap);
-    n.f5.accept(this, heap);
+    String callList = (String) n.f5.accept(this, heap);
     n.f6.accept(this, heap);
     return null;
   }
@@ -264,5 +288,39 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   private MemoryUnit getMemoryUnitFromScope(Heap heap, String functionName, String varName) {
     return heap.getMemoryUnitFromScope(functionName, varName);
+  }
+
+  private String addIntMemoryUnitsAndReturnResult(MemoryUnit unit1, MemoryUnit unit2) {
+    this.ifNotIntegersExitWithExecutorError(unit1, unit2);
+    return String.valueOf(unit1.getIntValue() + unit2.getIntValue());
+  }
+
+  private String subtractIntMemroyUnitAndReturnResult(MemoryUnit unit1, MemoryUnit unit2) {
+    this.ifNotIntegersExitWithExecutorError(unit1, unit2);
+    return String.valueOf(unit1.getIntValue() - unit2.getIntValue());
+  }
+
+  private String multiplyIntMemroyUnitAndReturnResult(MemoryUnit unit1, MemoryUnit unit2) {
+    this.ifNotIntegersExitWithExecutorError(unit1, unit2);
+    return String.valueOf(unit1.getIntValue() * unit2.getIntValue());
+  }
+
+  private int lessThanOppOnIntMemroyUnitAndReturnResult(MemoryUnit unit1, MemoryUnit unit2) {
+    this.ifNotIntegersExitWithExecutorError(unit1, unit2);
+    if (unit1.getIntValue() < unit2.getIntValue()) {
+      return 1;
+    }
+    return 0;
+  }
+
+  private void ifNotIntegersExitWithExecutorError(MemoryUnit unit1, MemoryUnit unit2) {
+    if (!unit1.isInt() || !unit2.isInt()) {
+      this.outWithExecutorError("Operands must be of type integers");
+    }
+  }
+
+  private void outWithExecutorError(String message) {
+    Log.log(message);
+    System.exit(1);
   }
 }

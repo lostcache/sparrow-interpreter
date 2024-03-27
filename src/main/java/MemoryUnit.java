@@ -15,6 +15,13 @@ class MemoryUnit {
     return this.type == VariableType.INTEGER;
   }
 
+  public int getIntValue() {
+    if (!this.isInt()) {
+      this.unexpectedError("Cannot get integer value because is not an integer");
+    }
+    return Integer.parseInt(this.valueImage);
+  }
+
   public boolean isStr() {
     return this.type == VariableType.STRING;
   }
@@ -29,5 +36,10 @@ class MemoryUnit {
 
   public VariableType getType() {
     return this.type;
+  }
+
+  private void unexpectedError(String message) {
+    Log.log(message);
+    System.exit(1);
   }
 }
