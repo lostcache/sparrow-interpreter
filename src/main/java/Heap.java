@@ -24,6 +24,12 @@ public class Heap {
     scope.addVar(varName, memBlock);
   }
 
+  public MemoryUnit getMemoryUnitFromScope(String functionName, String varName) {
+    Scope scope = this.getScopeMemory(functionName);
+    MemoryBlock memBlock = scope.getMemoryBlockByVarName(varName);
+    return memBlock.getMemoryUnitByIndex(0);
+  }
+
   public void debugInstructions() {
     Log.log(this.functionInstructions.keySet());
     for (String functionName : this.functionInstructions.keySet()) {

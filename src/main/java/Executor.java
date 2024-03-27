@@ -240,7 +240,7 @@ public class Executor extends GJDepthFirst<Object, Heap> {
   /** f0 -> <STRINGCONSTANT> */
   public Object visit(StringLiteral n, Heap heap) {
     n.f0.accept(this, heap);
-    return null;
+    return n.f0.toString();
   }
 
   private void log(String message) {
@@ -262,4 +262,7 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     System.exit(0);
   }
 
+  private MemoryUnit getMemoryUnitFromScope(Heap heap, String functionName, String varName) {
+    return heap.getMemoryUnitFromScope(functionName, varName);
+  }
 }

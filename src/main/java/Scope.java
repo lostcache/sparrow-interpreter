@@ -26,13 +26,13 @@ class Scope {
     }
   }
 
+  public MemoryBlock getMemoryBlockByVarName(String varName) {
+    return this.scopeMemory.get(varName);
+  }
+
   // private/helper methods
   private boolean variableExists(String varName) {
     return this.getMemoryBlockByVarName(varName) != null;
-  }
-
-  private MemoryBlock getMemoryBlockByVarName(String varName) {
-    return this.scopeMemory.get(varName);
   }
 
   private void exitBecauseOfUnexpectedBehaviour(String message) {

@@ -15,30 +15,6 @@ class MemoryBlock {
     this.memoryUnits.add(memUnit);
   }
 
-  public String getValueImage(int index) {
-    return getMemoryUnitByIndex(index).getValueImage();
-  }
-
-  public VariableType getMemoryUnitType(int index) {
-    MemoryUnit unit = getMemoryUnitByIndex(index);
-    return unit.getType();
-  }
-
-  public boolean isMemoryUnitInt(int index) {
-    MemoryUnit unit = getMemoryUnitByIndex(index);
-    return unit.getType() == VariableType.INTEGER;
-  }
-
-  public boolean isMemoryUnitStr(int index) {
-    MemoryUnit unit = getMemoryUnitByIndex(index);
-    return unit.getType() == VariableType.STRING;
-  }
-
-  public boolean isMemoryUnitFunc(int index) {
-    MemoryUnit unit = getMemoryUnitByIndex(index);
-    return unit.getType() == VariableType.FUNCTION;
-  }
-
   public int getBlockSize() {
     return this.memoryUnits.size();
   }
@@ -51,8 +27,8 @@ class MemoryBlock {
     return returnString;
   }
 
-  // private/helper methods
-  private MemoryUnit getMemoryUnitByIndex(int index) {
-    return this.memoryUnits.get(index);
+  public MemoryUnit getMemoryUnitByIndex(int index) {
+    MemoryUnit memUnit = this.memoryUnits.get(index);
+    return new MemoryUnit(memUnit.getValueImage(), memUnit.getType());
   }
 }
