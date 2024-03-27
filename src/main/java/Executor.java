@@ -174,11 +174,13 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> "alloc" f3 -> "(" f4 -> Identifier() f5 -> ")" */
   public Object visit(Alloc n, Heap heap) {
-    n.f0.accept(this, heap);
+    String assigneeName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
     n.f3.accept(this, heap);
-    n.f4.accept(this, heap);
+    String sizeVarName = (String) n.f4.accept(this, heap);
+    this.validateSizeVariable(heap, sizeVarName);
+    this.allocateMemoryInScope(heap, assigneeName);
     n.f5.accept(this, heap);
     return null;
   }
@@ -315,12 +317,22 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   private void ifNotIntegersExitWithExecutorError(MemoryUnit unit1, MemoryUnit unit2) {
     if (!unit1.isInt() || !unit2.isInt()) {
-      this.outWithExecutorError("Operands must be of type integers");
+      this.exitWithExecutionError("Operands must be of type integers");
     }
   }
 
-  private void outWithExecutorError(String message) {
+  private void exitWithExecutionError(String message) {
     Log.log(message);
     System.exit(1);
+  }
+
+  private void validateSizeVariable(Heap heap, String varName) {
+    MemoryUnit sizeVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, varName);
+    if (!sizeVarMemUnit.isInt()) {
+      this.exitWithExecutionError("the size var is not an int");
+    }
+    if (sizeVarMemUnit.getIntValue() % 4 != 0) {
+      this.exitProgramWithErrorMessage("the size must be a multiple of " + MemoryUnit.size);
+    }
   }
 }
