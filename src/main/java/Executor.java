@@ -5,6 +5,8 @@ import visitor.*;
 public class Executor extends GJDepthFirst<Object, Heap> {
   private static final boolean debug = false;
   private String currentFunction = null;
+  private String parentFunctionName = null;
+  private String parentFuncAssigneeVarName = null;
 
   /** f0 -> ( FunctionDeclaration() )* f1 -> <EOF> */
   public Object visit(Program n, Heap heap) {
@@ -28,7 +30,10 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     }
     n.f3.accept(this, heap);
     n.f4.accept(this, heap);
-    n.f5.accept(this, heap);
+    String returnVarName = (String) n.f5.accept(this, heap);
+    if (this.isTheFuncitonDeclaredIsNotMain(functionName)) {
+      this.returnValueFromThisFunc(heap, returnVarName);
+    }
     return null;
   }
 
@@ -36,8 +41,7 @@ public class Executor extends GJDepthFirst<Object, Heap> {
   public Object visit(Block n, Heap heap) {
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
-    return null;
+    return (String) n.f2.accept(this, heap);
   }
 
   /**
@@ -328,6 +332,17 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     }
   }
 
+  private boolean isTheFuncitonDeclaredIsNotMain(String functionName) {
+    return functionName != "Main";
+  }
+
+  private void checkIfCalledVarIsFunc(Heap heap, String varName) {
+    MemoryUnit calledVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, varName);
+    if (!calledVarMemUnit.isFunc()) {
+      this.exitWithExecutionError("the var called is not a function");
+    }
+  }
+
   private void allocateMemoryInScope(Heap heap, String varName, int size) {
     MemoryBlock memBlock = new MemoryBlock();
     for (int i = 0; i < size; i++) {
@@ -378,6 +393,22 @@ public class Executor extends GJDepthFirst<Object, Heap> {
   private void moveVarValue(Heap heap, String assigneVarName, String valueVarName) {
     MemoryUnit valueVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, valueVarName);
     this.putVarInMemory(heap, assigneVarName,new MemoryUnit(valueVarMemUnit.getValueImage(), valueVarMemUnit.getType()));
+  }
+
+  private void setParentFuncMetaDataToReturnValueFromCalledFunc(String functionName, String assigneeVarName) {
+    this.parentFunctionName = this.currentFunction;
+    this.parentFuncAssigneeVarName = assigneeVarName;
+  }
+
+  private void resetParentFuncMetaData() {
+      this.parentFuncAssigneeVarName = null;
+      this.parentFunctionName = null;
+  }
+
+  private void returnValueFromThisFunc(Heap heap, String returnVarName) {
+    MemoryBlock returnedMemBlock = this.getMemoryBlockFromScope(heap, this.currentFunction, returnVarName);
+    heap.updateMemoryBlockInScope(this.parentFunctionName, this.parentFuncAssigneeVarName, returnedMemBlock);
+    this.resetParentFuncMetaData();
   }
 }
 
