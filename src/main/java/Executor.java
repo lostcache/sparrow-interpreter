@@ -5,6 +5,7 @@ import visitor.*;
 public class Executor extends GJDepthFirst<Object, Heap> {
   private static final boolean debug = false;
   private String currentFunction = null;
+  private List<MemoryUnit> calledFunctionParams = null;
   private String parentFunctionName = null;
   private String parentFuncAssigneeVarName = null;
 
@@ -23,10 +24,9 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     this.updateCurrentFunction(functionName);
     heap.createNewFunctionScope(functionName);
     n.f2.accept(this, heap);
-    List<Node> paramList = n.f3.nodes;
-    for (Node param : paramList) {
-      String paramName = (String) param.accept(this, heap);
-      Log.log("param -> " + paramName);
+    if (this.isTheFuncitonDeclaredIsNotMain(functionName)) {
+      this.mapDeclaredParamsToCalledParams(heap, n.f3.nodes);
+      this.resetCalledFunctionParams();
     }
     n.f3.accept(this, heap);
     n.f4.accept(this, heap);
@@ -232,15 +232,17 @@ public class Executor extends GJDepthFirst<Object, Heap> {
    * f6 -> ")"
    */
   public Object visit(Call n, Heap heap) {
-    n.f0.accept(this, heap);
+    String assigneeVarName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
     String calledVarName = (String) n.f3.accept(this, heap);
-    // MemoryUnit calledMemUnit =
-    //     this.getMemoryUnitFromScope(heap, this.currentFunction, calledVarName);
+    this.checkIfCalledVarIsFunc(heap, calledVarName);
     n.f4.accept(this, heap);
-    String callList = (String) n.f5.accept(this, heap);
+    n.f5.accept(this, heap);
+    this.initCalledFunctionParams();
+    this.rememberParamsOfCalledFunc(heap, n.f5.nodes);
     n.f6.accept(this, heap);
+    this.setParentFuncMetaDataToReturnValueFromCalledFunc(this.currentFunction, assigneeVarName);
     return null;
   }
 
@@ -336,10 +338,29 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     return functionName != "Main";
   }
 
+  private void rememberParamsOfCalledFunc(Heap heap, List<Node> params) {
+    for (Node param : params) {
+      String paramVarName = (String) param.accept(this, heap);
+      MemoryUnit paramMemUnit =
+          this.getMemoryUnitFromScope(heap, this.currentFunction, paramVarName);
+      this.calledFunctionParams.add(paramMemUnit);
+    }
+  }
+
   private void checkIfCalledVarIsFunc(Heap heap, String varName) {
     MemoryUnit calledVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, varName);
     if (!calledVarMemUnit.isFunc()) {
       this.exitWithExecutionError("the var called is not a function");
+    }
+  }
+
+  private void mapDeclaredParamsToCalledParams(Heap heap, List<Node> declaredParams) {
+    int paramIndex = -1;
+    for (Node param : declaredParams) {
+      paramIndex += 1;
+      String paramName = (String) param.accept(this, heap);
+      MemoryUnit paramMemUnit = this.calledFunctionParams.get(paramIndex);
+      this.putVarInMemory(heap, paramName, paramMemUnit);
     }
   }
 
@@ -388,6 +409,14 @@ public class Executor extends GJDepthFirst<Object, Heap> {
       assigneeName,
       new MemoryUnit(memUnitToAssign.getValueImage(), memUnitToAssign.getType())
     );
+  }
+
+  private void initCalledFunctionParams() {
+    this.calledFunctionParams = new ArrayList<MemoryUnit>();
+  }
+
+  private void resetCalledFunctionParams() {
+    this.calledFunctionParams = null;
   }
 
   private void moveVarValue(Heap heap, String assigneVarName, String valueVarName) {
