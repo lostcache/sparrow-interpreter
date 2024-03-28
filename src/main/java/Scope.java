@@ -30,11 +30,11 @@ class Scope {
     return this.scopeMemory.get(varName);
   }
 
-  // private/helper methods
-  private boolean variableExists(String varName) {
-    return this.getMemoryBlockByVarName(varName) != null;
+  public void updateMemoryBlock(String varName, MemoryBlock memBlock) {
+    this.scopeMemory.put(varName, memBlock);
   }
 
+  // private/helper methods
   private void exitBecauseOfUnexpectedBehaviour(String message) {
     System.out.println(message);
     System.exit(1);

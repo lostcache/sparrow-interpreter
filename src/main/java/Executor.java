@@ -155,12 +155,13 @@ public class Executor extends GJDepthFirst<Object, Heap> {
    */
   public Object visit(Store n, Heap heap) {
     n.f0.accept(this, heap);
-    n.f1.accept(this, heap);
+    String assigneeName = (String) n.f1.accept(this, heap);
     n.f2.accept(this, heap);
-    n.f3.accept(this, heap);
+    String indexImage = (String) n.f3.accept(this, heap);
     n.f4.accept(this, heap);
     n.f5.accept(this, heap);
-    n.f6.accept(this, heap);
+    String valVarName = (String) n.f6.accept(this, heap);
+    this.updateValueOfUnitInMemBlock(heap, assigneeName, indexImage, valVarName); 
     return null;
   }
 
@@ -179,8 +180,8 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     n.f2.accept(this, heap);
     n.f3.accept(this, heap);
     String sizeVarName = (String) n.f4.accept(this, heap);
-    this.validateSizeVariable(heap, sizeVarName);
-    this.allocateMemoryInScope(heap, assigneeName);
+    int size = this.validateAndGetSizeVariableValue(heap, sizeVarName);
+    this.allocateMemoryInScope(heap, assigneeName, size);
     n.f5.accept(this, heap);
     return null;
   }
@@ -292,6 +293,10 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     return heap.getMemoryUnitFromScope(functionName, varName);
   }
 
+  private MemoryBlock getMemoryBlockFromScope(Heap heap, String functionName, String varName) {
+    return heap.getMemoryBlockFromScope(functionName, varName);
+  }
+
   private String addIntMemoryUnitsAndReturnResult(MemoryUnit unit1, MemoryUnit unit2) {
     this.ifNotIntegersExitWithExecutorError(unit1, unit2);
     return String.valueOf(unit1.getIntValue() + unit2.getIntValue());
@@ -321,18 +326,39 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     }
   }
 
+  private void allocateMemoryInScope(Heap heap, String varName, int size) {
+    MemoryBlock memBlock = new MemoryBlock();
+    for (int i = 0; i < size; i++) {
+      memBlock.addMemoryUnit(new MemoryUnit("", VariableType.NULL));
+    }
+    heap.addVarToScope(this.currentFunction, varName, memBlock);
+  }
+
   private void exitWithExecutionError(String message) {
     Log.log(message);
     System.exit(1);
   }
 
-  private void validateSizeVariable(Heap heap, String varName) {
+  private int validateAndGetSizeVariableValue(Heap heap, String varName) {
     MemoryUnit sizeVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, varName);
     if (!sizeVarMemUnit.isInt()) {
       this.exitWithExecutionError("the size var is not an int");
     }
-    if (sizeVarMemUnit.getIntValue() % 4 != 0) {
+    if (sizeVarMemUnit.getIntValue() % MemoryUnit.size != 0) {
       this.exitProgramWithErrorMessage("the size must be a multiple of " + MemoryUnit.size);
     }
+    return sizeVarMemUnit.getIntValue() / MemoryUnit.size;
+  }
+
+  private void updateValueOfUnitInMemBlock(Heap heap, String assigneeName, String indexImage, String valVarName) {
+    MemoryBlock assigneeMemBlock = this.getMemoryBlockFromScope(heap, this.currentFunction, assigneeName);
+    int index = Integer.parseInt(indexImage);
+    MemoryUnit valVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, valVarName);
+    assigneeMemBlock.updateMemoryUnit(
+      index,
+      new MemoryUnit(valVarMemUnit.getValueImage(),
+      valVarMemUnit.getType())
+    );
+    heap.updateMemoryBlockInScope(this.currentFunction, assigneeName, assigneeMemBlock);
   }
 }
