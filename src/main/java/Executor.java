@@ -139,13 +139,14 @@ public class Executor extends GJDepthFirst<Object, Heap> {
    * -> "]"
    */
   public Object visit(Load n, Heap heap) {
-    n.f0.accept(this, heap);
+    String assigneeName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
-    n.f3.accept(this, heap);
+    String valueVarName = (String) n.f3.accept(this, heap);
     n.f4.accept(this, heap);
-    n.f5.accept(this, heap);
+    String indexImage = (String) n.f5.accept(this, heap);
     n.f6.accept(this, heap);
+    this.getValueFromBlockAndAssignToVar(heap, assigneeName, valueVarName, indexImage);
     return null;
   }
 
@@ -361,4 +362,16 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     );
     heap.updateMemoryBlockInScope(this.currentFunction, assigneeName, assigneeMemBlock);
   }
+
+  private void getValueFromBlockAndAssignToVar(Heap heap, String assigneeName, String valueVarName, String indexImage) {
+    MemoryBlock valueMemBlock = this.getMemoryBlockFromScope(heap, this.currentFunction, valueVarName);
+    int index = Integer.parseInt(indexImage);
+    MemoryUnit memUnitToAssign = valueMemBlock.getMemoryUnitByIndex(index);
+    this.putVarInMemory(
+      heap,
+      assigneeName,
+      new MemoryUnit(memUnitToAssign.getValueImage(), memUnitToAssign.getType())
+    );
+  }
+
 }
