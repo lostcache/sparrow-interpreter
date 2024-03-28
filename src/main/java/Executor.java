@@ -168,9 +168,10 @@ public class Executor extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() */
   public Object visit(Move n, Heap heap) {
-    n.f0.accept(this, heap);
+    String asigneeVarName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
-    n.f2.accept(this, heap);
+    String valueVarName = (String) n.f2.accept(this, heap);
+    this.moveVarValue(heap, asigneeVarName, valueVarName);
     return null;
   }
 
@@ -374,4 +375,9 @@ public class Executor extends GJDepthFirst<Object, Heap> {
     );
   }
 
+  private void moveVarValue(Heap heap, String assigneVarName, String valueVarName) {
+    MemoryUnit valueVarMemUnit = this.getMemoryUnitFromScope(heap, this.currentFunction, valueVarName);
+    this.putVarInMemory(heap, assigneVarName,new MemoryUnit(valueVarMemUnit.getValueImage(), valueVarMemUnit.getType()));
+  }
 }
+
