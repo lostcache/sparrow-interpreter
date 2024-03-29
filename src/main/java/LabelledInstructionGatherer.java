@@ -10,7 +10,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> ( FunctionDeclaration() )* f1 -> <EOF> */
   public Object visit(Program n, Heap heap) {
-    if (debug) this.log("visiting program");
+    if (debug) Log.log("visiting program");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     return null;
@@ -18,7 +18,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> "func" f1 -> FunctionName() f2 -> "(" f3 -> ( Identifier() )* f4 -> ")" f5 -> Block() */
   public Object visit(FunctionDeclaration n, Heap heap) {
-    if (debug) this.log("visiting program");
+    if (debug) Log.log("visiting program");
     this.initInstructionsUnderCurrentFunction();
     this.resetCurrentLabel();
     n.f0.accept(this, heap);
@@ -33,7 +33,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> ( Instruction() )* f1 -> "return" f2 -> Identifier() */
   public Object visit(Block n, Heap heap) {
-    if (debug) this.log("visiting block");
+    if (debug) Log.log("visiting block");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     String returnIdentifier = (String) n.f2.accept(this, heap);
@@ -48,7 +48,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
    * | Call()
    */
   public Object visit(Instruction n, Heap heap) {
-    if (debug) this.log("visiting instruction");
+    if (debug) Log.log("visiting instruction");
     // if the instruction is not decleration of new label add to instructions.
     if (n.f0.which != 0) this.addToInstrutionsUnderCurrentFunction(n);
     n.f0.accept(this, heap);
@@ -57,7 +57,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Label() f1 -> ":" */
   public Object visit(LabelWithColon n, Heap heap) {
-    if (debug) this.log("visiting label");
+    if (debug) Log.log("visiting label");
     String label = (String) n.f0.accept(this, heap);
     this.updateCurrentLabel(label);
     n.f1.accept(this, heap);
@@ -66,7 +66,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> IntegerLiteral() */
   public Object visit(SetInteger n, Heap heap) {
-    if (debug) this.log("visiting set int");
+    if (debug) Log.log("visiting set int");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -75,7 +75,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> "@" f3 -> FunctionName() */
   public Object visit(SetFuncName n, Heap heap) {
-    if (debug) this.log("visiting set func");
+    if (debug) Log.log("visiting set func");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -85,7 +85,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "+" f4 -> Identifier() */
   public Object visit(Add n, Heap heap) {
-    if (debug) this.log("visiting set add");
+    if (debug) Log.log("visiting set add");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -96,7 +96,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "-" f4 -> Identifier() */
   public Object visit(Subtract n, Heap heap) {
-    if (debug) this.log("visiting set sub");
+    if (debug) Log.log("visiting set sub");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -107,7 +107,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "*" f4 -> Identifier() */
   public Object visit(Multiply n, Heap heap) {
-    if (debug) this.log("visiting multiply");
+    if (debug) Log.log("visiting multiply");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -118,7 +118,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() f3 -> "<" f4 -> Identifier() */
   public Object visit(LessThan n, Heap heap) {
-    if (debug) this.log("visiting less than");
+    if (debug) Log.log("visiting less than");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -132,7 +132,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
    * -> "]"
    */
   public Object visit(Load n, Heap heap) {
-    if (debug) this.log("visiting load");
+    if (debug) Log.log("visiting load");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -148,7 +148,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
    * Identifier()
    */
   public Object visit(Store n, Heap heap) {
-    if (debug) this.log("visiting store");
+    if (debug) Log.log("visiting store");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -161,7 +161,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> Identifier() */
   public Object visit(Move n, Heap heap) {
-    if (debug) this.log("visiting move");
+    if (debug) Log.log("visiting move");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -170,7 +170,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> Identifier() f1 -> "=" f2 -> "alloc" f3 -> "(" f4 -> Identifier() f5 -> ")" */
   public Object visit(Alloc n, Heap heap) {
-    if (debug) this.log("visiting alloc");
+    if (debug) Log.log("visiting alloc");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -182,7 +182,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> "print" f1 -> "(" f2 -> Identifier() f3 -> ")" */
   public Object visit(Print n, Heap heap) {
-    if (debug) this.log("visiting print");
+    if (debug) Log.log("visiting print");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -192,7 +192,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> "error" f1 -> "(" f2 -> StringLiteral() f3 -> ")" */
   public Object visit(ErrorMessage n, Heap heap) {
-    if (debug) this.log("visiting error message");
+    if (debug) Log.log("visiting error message");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -202,7 +202,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> "goto" f1 -> Label() */
   public Object visit(Goto n, Heap heap) {
-    if (debug) this.log("visiting label");
+    if (debug) Log.log("visiting label");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     return null;
@@ -210,7 +210,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> "if0" f1 -> Identifier() f2 -> "goto" f3 -> Label() */
   public Object visit(IfGoto n, Heap heap) {
-    if (debug) this.log("visiting if goto");
+    if (debug) Log.log("visiting if goto");
     // this.resetCurrentLabelAndInstructionsList();
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
@@ -224,7 +224,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
    * f6 -> ")"
    */
   public Object visit(Call n, Heap heap) {
-    if (debug) this.log("visiting call");
+    if (debug) Log.log("visiting call");
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -237,41 +237,37 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   /** f0 -> <IDENTIFIER> */
   public Object visit(FunctionName n, Heap heap) {
-    if (debug) this.log("visiting function name");
+    if (debug) Log.log("visiting function name");
     n.f0.accept(this, heap);
     return n.f0.toString();
   }
 
   /** f0 -> <IDENTIFIER> */
   public Object visit(Label n, Heap heap) {
-    if (debug) this.log("visiting label");
+    if (debug) Log.log("visiting label");
     n.f0.accept(this, heap);
     return n.f0.toString();
   }
 
   /** f0 -> <IDENTIFIER> */
   public Object visit(Identifier n, Heap heap) {
-    if (debug) this.log("visiting id");
+    if (debug) Log.log("visiting id");
     n.f0.accept(this, heap);
     return n.f0.toString();
   }
 
   /** f0 -> <INTEGER_LITERAL> */
   public Object visit(IntegerLiteral n, Heap heap) {
-    if (debug) this.log("visiting int literal");
+    if (debug) Log.log("visiting int literal");
     n.f0.accept(this, heap);
     return null;
   }
 
   /** f0 -> <STRINGCONSTANT> */
   public Object visit(StringLiteral n, Heap heap) {
-    if (debug) this.log("visiting string literal");
+    if (debug) Log.log("visiting string literal");
     n.f0.accept(this, heap);
     return null;
-  }
-
-  private void log(String message) {
-    System.out.println(message);
   }
 
   private void updateCurrentFunction(String functionName) {
@@ -308,7 +304,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
   }
 
   private void failWithMessage(String message) {
-    this.log(message);
+    Log.log(message);
     System.exit(1);
   }
 }
