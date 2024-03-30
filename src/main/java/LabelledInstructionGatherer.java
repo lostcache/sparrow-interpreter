@@ -51,7 +51,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
   public Object visit(Instruction n, Heap heap) {
     if (debug) Log.log("visiting instruction");
     // if the instruction is not decleration of new label add to instructions.
-    if (n.f0.which != 0) this.addToInstrutionsUnderCurrentFunction(n);
+    this.addToInstrutionsUnderCurrentFunction(n);
     n.f0.accept(this, heap);
     return null;
   }
