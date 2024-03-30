@@ -3,11 +3,11 @@ import java.util.*;
 
 class Executor extends GJDepthFirst<Object, Heap> {
   private static final boolean debug = false;
-  private String currentFunction = null;
   private List<MemoryUnit> calledFunctionParams = null;
-  private String parentFunctionName = null;
   private MemoryBlock returnValueFromCalledFunction = null;
   private List<String> functionCallStack = new ArrayList<String>();
+  private int programCounter = 0;
+  private List<Integer> programCounterStack = new ArrayList<Integer>();
 
   public void startExecution(Heap heap) {
     this.executeInstructionUnderFunction(heap, "Main");
@@ -15,20 +15,23 @@ class Executor extends GJDepthFirst<Object, Heap> {
   }
 
   private void executeInstructionUnderFunction(Heap heap, String calledFunctionName) {
+    this.resetProgramCounter();
     this.pushFunctionInCallStack(calledFunctionName);
     heap.createNewFunctionScope(calledFunctionName);
     this.mapCalledParamsToFuncParams(heap, calledFunctionName);
     List<LabelledInstruction> calledFunctionInstructions = heap.getInstructionsByFuncitonName(calledFunctionName);
     int totalInstructions = calledFunctionInstructions.size();
-    for (int i = 0; i < totalInstructions; i++) {
-      LabelledInstruction currentInstruction = calledFunctionInstructions.get(i);
+    while (programCounter < totalInstructions) {
+      LabelledInstruction currentInstruction = calledFunctionInstructions.get(programCounter);
       InstructionUnit currentInstructionUnit = currentInstruction.getInstructionUnit();
       if (currentInstructionUnit.isInstruction()) {
         Instruction instruction = currentInstructionUnit.getInstruction();
         instruction.accept(this, heap);
+        programCounter++;
       } else if (currentInstructionUnit.isReturnStatement()) {
         String returnVarName = currentInstructionUnit.getRuturnIdentifier();
         this.returnValueFromCalledFunction = heap.getMemoryBlockFromScope(this.peekFunctionStack(), returnVarName);
+        return;
       }
     }
   }
@@ -240,6 +243,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
    */
   public Object visit(Call n, Heap heap) {
     if (debug) Log.log("Visiting Call");
+    this.pushToProgramCounterStack(this.programCounter);
     String assigneeVarName = (String) n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     n.f2.accept(this, heap);
@@ -248,19 +252,21 @@ class Executor extends GJDepthFirst<Object, Heap> {
     String calledFunctionName = this.getMemoryUnitFromScope(heap, this.peekFunctionStack(), calledVarName).getValueImage();
     n.f4.accept(this, heap);
     n.f5.accept(this, heap);
+
     this.initCalledFunctionParams();
     this.rememberParamsValuesOfCalledFunc(heap, n.f5.nodes);
+
     n.f6.accept(this, heap);
-    this.setCalleeFunctionMetadata(this.peekFunctionStack());
+
     this.executeInstructionUnderFunction(heap, calledFunctionName);
 
+    this.setProgramCounter(this.popFromProgramCounterStack());
     this.popFunctionStack();
 
     // assign return value
     heap.updateMemoryBlockInScope(this.peekFunctionStack(), assigneeVarName, this.returnValueFromCalledFunction);
 
     this.resetCalledFunctionParams();
-    this.resetCalleeFunctionMetadata();
     this.returnValueFromCalledFunction = null;
     return null;
   }
@@ -329,14 +335,6 @@ class Executor extends GJDepthFirst<Object, Heap> {
 
   private void resetCalledFunctionParams() {
     this.calledFunctionParams = null;
-  }
-
-  private void setCalleeFunctionMetadata(String functionName) {
-    this.parentFunctionName = this.peekFunctionStack();
-  }
-
-  private void resetCalleeFunctionMetadata() {
-    this.parentFunctionName = null;
   }
 
   private void allocateMemoryInScope(Heap heap, String varName, int size) {
@@ -442,6 +440,22 @@ class Executor extends GJDepthFirst<Object, Heap> {
 
   private void pushFunctionInCallStack(String functionName) {
     this.functionCallStack.add(functionName);
+  }
+
+  private void resetProgramCounter() {
+    this.programCounter = 0;
+  }
+
+  private void setProgramCounter(int value) {
+    this.programCounter = value;
+  }
+
+  private void pushToProgramCounterStack(int value) {
+    this.programCounterStack.add(value);
+  }
+
+  private int popFromProgramCounterStack() {
+    return this.programCounterStack.remove(this.programCounterStack.size() - 1);
   }
 }
 
