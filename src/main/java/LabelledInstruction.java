@@ -1,10 +1,10 @@
 import java.util.*;
 
-class LabelledInstructions {
+class LabelledInstruction {
   private String label = new String("");
   private InstructionUnit instructionUnit = null;
 
-  public LabelledInstructions(String label, InstructionUnit instructionUnit) {
+  public LabelledInstruction(String label, InstructionUnit instructionUnit) {
     this.label = label;
     if (instructionUnit == null) {
       Log.log("instruction unit cannot be null");
@@ -13,7 +13,7 @@ class LabelledInstructions {
     this.instructionUnit = instructionUnit;
   }
 
-  public InstructionUnit getInstruction() {
+  public InstructionUnit getInstructionUnit() {
     return this.instructionUnit;
   }
 

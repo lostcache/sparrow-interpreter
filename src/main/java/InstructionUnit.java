@@ -23,4 +23,12 @@ class InstructionUnit {
   public boolean isReturnStatement() {
     return this.returnStatementIdentifier != null;
   }
+
+  public Instruction getInstruction() {
+    return this.instruction;
+  }
+
+  public String getRuturnIdentifier() {
+    return this.returnStatementIdentifier;
+  }
 }

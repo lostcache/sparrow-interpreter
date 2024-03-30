@@ -3,8 +3,6 @@ import syntaxtree.*;
 import visitor.*;
 
 public class Interpreter {
-  private static final boolean debug = true;
-
   public static void main(String[] args) throws ParseException {
     // main entrance starts here
 
@@ -19,12 +17,14 @@ public class Interpreter {
     LabelledInstructionGatherer labelledInstructionGatherer = new LabelledInstructionGatherer();
     // collect all the labelled instructions in the first pass to implement goto.
     root.accept(labelledInstructionGatherer, heap);
+    // heap.debugFunctionParams();
 
-    // init executor
-    Executor exec = new Executor();
-    root.accept(exec, heap);
+    // heap.debugInstructions();
 
-    // if (debug) heap.debugInstructions();
-    if (debug) heap.debugMemory();
+    Executor instExec = new Executor();
+    instExec.startExecution(heap);
+
+    // heap.debugMemory();
   }
 }
+

@@ -5,7 +5,7 @@ import syntaxtree.*;
 public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
   private static final boolean debug = false;
   private String currentLabel = new String("");
-  private List<LabelledInstructions> instructionsUnderCurrentFunction = null;
+  private List<LabelledInstruction> instructionsUnderCurrentFunction = null;
   private String currentFunction = null;
 
   /** f0 -> ( FunctionDeclaration() )* f1 -> <EOF> */
@@ -26,6 +26,7 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
     this.updateCurrentFunction(functionName);
     n.f2.accept(this, heap);
     n.f3.accept(this, heap);
+    this.gatherFunctionParams(heap, n.f3.nodes, functionName);
     n.f4.accept(this, heap);
     n.f5.accept(this, heap);
     return null;
@@ -267,7 +268,16 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
   public Object visit(StringLiteral n, Heap heap) {
     if (debug) Log.log("visiting string literal");
     n.f0.accept(this, heap);
-    return null;
+    return n.f0.toString();
+  }
+
+  private void gatherFunctionParams(Heap heap, List<Node> params, String functionName) {
+    List<String> funParams = new ArrayList<String>();
+    for (Node param : params) {
+      String paramName = (String) param.accept(this, heap);
+      funParams.add(paramName);
+    }
+    heap.rememberFunParams(functionName, funParams);
   }
 
   private void updateCurrentFunction(String functionName) {
@@ -276,16 +286,16 @@ public class LabelledInstructionGatherer extends GJDepthFirst<Object, Heap> {
 
   private void addToInstrutionsUnderCurrentFunction(Instruction instruction) {
     this.instructionsUnderCurrentFunction.add(
-        new LabelledInstructions(this.currentLabel, new InstructionUnit(instruction)));
+        new LabelledInstruction(this.currentLabel, new InstructionUnit(instruction)));
   }
 
   private void addToInstrutionsUnderCurrentFunction(String returnId) {
     this.instructionsUnderCurrentFunction.add(
-        new LabelledInstructions(this.currentLabel, new InstructionUnit(returnId)));
+        new LabelledInstruction(this.currentLabel, new InstructionUnit(returnId)));
   }
 
   private void initInstructionsUnderCurrentFunction() {
-    this.instructionsUnderCurrentFunction = new ArrayList<LabelledInstructions>();
+    this.instructionsUnderCurrentFunction = new ArrayList<LabelledInstruction>();
   }
 
   private void updateCurrentLabel(String label) {
