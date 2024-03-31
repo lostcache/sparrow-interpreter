@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class Heap {
-  public static final int memBlockSize = 4;
   private Map<String, List<LabelledInstruction>> functionInstructions;
   private Map<String, List<Scope>> memory = null;
   private Map<String, List<String>> funcParamMap = null;
@@ -20,31 +19,47 @@ public class Heap {
   }
 
   public void createNewFunctionScope(String functionName) {
-    if (this.getScopeMemory(functionName) != null) {
+    if (this.getScope(functionName) != null) {
       this.addToExistingScope(functionName);
     } else {
       this.createNewScopeList(functionName);
     }
   }
 
-  public void addVarToScope(String functionName, String varName, MemoryBlock memBlock) {
-    Scope scope = this.getScopeMemory(functionName);
-    scope.addVar(varName, memBlock);
+  public void putVarInScope(String functionName, String varName, MemoryUnit memUnit) {
+    Scope scope = this.getScope(functionName);
+    scope.createVariable(varName, memUnit);
   }
 
-  public MemoryUnit getMemoryUnitFromScope(String functionName, String varName) {
-    MemoryBlock memBlock = this.getMemoryBlockFromScope(functionName, varName);
-    return memBlock.getMemoryUnitByIndex(0);
+  public MemoryUnit getMemoryUnitFromScope(String functionName, String identifier) {
+    Scope currentScope = this.getScope(functionName);
+    return currentScope.getIdentifierValue(identifier);
   }
 
-  public MemoryBlock getMemoryBlockFromScope(String functionName, String varName) {
-    Scope scope = this.getScopeMemory(functionName);
-    return scope.getMemoryBlockByVarName(varName);
+  public MemoryUnit getMemoryUnitWithOffsetFromScope(String functionName, String identifier, int offset) {
+    Scope currentScope = this.getScope(functionName);
+    return currentScope.getIdentifierValueWithOffset(identifier, offset);
   }
 
-  public void updateMemoryBlockInScope(String functionName, String varName, MemoryBlock memBlock) {
-    Scope scope = this.getScopeMemory(functionName);
-    scope.updateMemoryBlock(varName, memBlock);
+  public void allocateMemroy(String functionName, String identifier, int size) {
+    this.putVarInScope(functionName, identifier, new MemoryUnit("", VariableType.NULL));
+    Scope currentScope = this.getScope(functionName);
+    MemoryAddress baseAddress = currentScope.getAddressOfIdentifier(identifier);
+    for (int i = 0; i < size - 1; i++) {
+      currentScope.putValueinAddress(baseAddress.getIntValue() + MemoryUnit.size, new MemoryUnit("", VariableType.NULL));
+    }
+  }
+
+  public void putValueAtAddressWithOffset(String functionName, String baseIdentifier, int offset, MemoryUnit memUnit) {
+    Scope scope = this.getScope(functionName);
+    MemoryAddress baseAddress = scope.getAddressOfIdentifier(baseIdentifier);
+    int desiredAddress = baseAddress.getIntValue() + offset;
+    scope.putValueinAddress(desiredAddress, memUnit);
+  }
+
+  public void moveValueInScope(String functionName, String lhs, String rhs) {
+    Scope scope = this.getScope(functionName);
+    scope.moveValue(lhs, rhs);
   }
 
   public int getInstructionAddressByLabel(String currentFunction, String desiredLabel) {
@@ -72,25 +87,6 @@ public class Heap {
     }
   }
 
-  public void debugMemory() {
-    Log.log("debugging memory ----------------->");
-    for (String functionName : this.memory.keySet()) {
-      Log.log("current scope name -> " + functionName);
-      Scope scope = this.getScopeMemory(functionName);
-      scope.debugScopeMemory();
-    }
-  }
-
-  public void debugFunctionParams() {
-    Log.log("Debugging funciton params ----------------->");
-    for (String functionName : this.funcParamMap.keySet()) {
-      Log.log("function -> " + functionName);
-      for (String paramName : this.funcParamMap.get(functionName)) {
-        Log.log("param -> " + paramName);
-      }
-    }
-  }
-
   public void rememberFunParams(String functionName, List<String> params) {
     this.funcParamMap.put(functionName, params);
   }
@@ -109,7 +105,7 @@ public class Heap {
     this.memory.put(functionName, currentScopeList);
   }
 
-  private Scope getScopeMemory(String functionName) {
+  private Scope getScope(String functionName) {
     List<Scope> scopeList = this.memory.get(functionName);
     if (scopeList == null) {
       return null;
@@ -131,6 +127,25 @@ public class Heap {
     List<Scope> newScopeList = new ArrayList<Scope>();
     newScopeList.add(new Scope());
     this.memory.put(functionName, newScopeList);
+  }
+
+  public void debugMemory() {
+    Log.log("debugging memory ----------------->");
+    for (String functionName : this.memory.keySet()) {
+      Log.log("current scope name -> " + functionName);
+      Scope scope = this.getScope(functionName);
+      scope.debugScopeMemory();
+    }
+  }
+
+  public void debugFunctionParams() {
+    Log.log("Debugging funciton params ----------------->");
+    for (String functionName : this.funcParamMap.keySet()) {
+      Log.log("function -> " + functionName);
+      for (String paramName : this.funcParamMap.get(functionName)) {
+        Log.log("param -> " + paramName);
+      }
+    }
   }
 }
 

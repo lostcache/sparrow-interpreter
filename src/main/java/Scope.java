@@ -1,46 +1,57 @@
 import java.util.*;
 
 class Scope {
-  private Map<String, MemoryBlock> scopeMemory = null;
+  private int addressStartValue = 0;
+  private Map<String, MemoryAddress> identifierToAddressMap = null;
+  private Map<String, MemoryUnit> scopeMemory = null;
 
   public Scope() {
-    this.scopeMemory = new HashMap<String, MemoryBlock>();
+    this.identifierToAddressMap = new HashMap<String, MemoryAddress>();
+    this.scopeMemory = new HashMap<String, MemoryUnit>();
   }
 
-  public void updateVarInMemory(String varName, MemoryBlock memBlock) {
-    if (!isExistingBlockSizeSame(varName, memBlock.getBlockSize())) {
-      this.exitBecauseOfUnexpectedBehaviour(
-          "Memory block size does not match aka segmentation fault");
-    }
-    this.scopeMemory.put(varName, memBlock);
+  public void createVariable(String identifier, MemoryUnit memUnit) {
+    MemoryAddress address = new MemoryAddress(this.addressStartValue);
+    this.identifierToAddressMap.put(identifier, address);
+    this.scopeMemory.put(address.getStrValue(), memUnit);
+    this.addressStartValue += MemoryUnit.size;
   }
 
-  public void addVar(String varName, MemoryBlock memBlock) {
-    this.scopeMemory.put(varName, memBlock);
+  public void putValueinAddress(int address, MemoryUnit memUnit) {
+    MemoryAddress desiredAddress = new MemoryAddress(address);
+    this.scopeMemory.put(desiredAddress.getStrValue(), memUnit);
+  }
+
+  public MemoryUnit getIdentifierValue(String identifier) {
+    MemoryAddress memoryAddress = this.getAddressOfIdentifier(identifier);
+    return this.getMemoryUnitByAddress(memoryAddress);
+  }
+
+  public MemoryUnit getIdentifierValueWithOffset(String identifier, int offset) {
+    MemoryAddress memoryAddress = this.getAddressOfIdentifier(identifier);
+    int desiredAddress = memoryAddress.getIntValue() + offset;
+    return this.getMemoryUnitByAddress(new MemoryAddress(desiredAddress));
+  }
+
+  public MemoryAddress getAddressOfIdentifier(String identifier) {
+    return this.identifierToAddressMap.get(identifier);
+  }
+
+  public void moveValue(String lhs, String rhs) {
+    MemoryAddress rhsMemAddress = this.getAddressOfIdentifier(rhs);
+    this.identifierToAddressMap.put(lhs, rhsMemAddress);
+  }
+
+  private MemoryUnit getMemoryUnitByAddress(MemoryAddress address) {
+    return this.scopeMemory.get(address.getStrValue());
   }
 
   public void debugScopeMemory() {
-    for (String varName : this.scopeMemory.keySet()) {
-      MemoryBlock block = this.getMemoryBlockByVarName(varName);
-      Log.log(varName + " -> " + block.getValueImageOfMemUnits());
+    for (String identifier : identifierToAddressMap.keySet()) {
+      Log.log("id -> " + identifier + " -> " + this.getAddressOfIdentifier(identifier).getStrValue());
     }
-  }
-
-  public MemoryBlock getMemoryBlockByVarName(String varName) {
-    return this.scopeMemory.get(varName);
-  }
-
-  public void updateMemoryBlock(String varName, MemoryBlock memBlock) {
-    this.scopeMemory.put(varName, memBlock);
-  }
-
-  // private/helper methods
-  private void exitBecauseOfUnexpectedBehaviour(String message) {
-    System.out.println(message);
-    System.exit(1);
-  }
-
-  private boolean isExistingBlockSizeSame(String varName, int newSize) {
-    return this.getMemoryBlockByVarName(varName).getBlockSize() == newSize;
+    for (String memAddress : this.scopeMemory.keySet()) {
+      Log.log("add -> " + memAddress + " -> " + this.scopeMemory.get(memAddress));
+    }
   }
 }
