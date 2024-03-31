@@ -21,13 +21,13 @@ class Executor extends GJDepthFirst<Object, Heap> {
     this.mapCalledParamsToFuncParams(heap, calledFunctionName);
     List<LabelledInstruction> calledFunctionInstructions = heap.getInstructionsByFuncitonName(calledFunctionName);
     int totalInstructions = calledFunctionInstructions.size();
-    while (programCounter < totalInstructions) {
+    while (this.programCounter < totalInstructions) {
       LabelledInstruction currentInstruction = calledFunctionInstructions.get(programCounter);
       InstructionUnit currentInstructionUnit = currentInstruction.getInstructionUnit();
       if (currentInstructionUnit.isInstruction()) {
         Instruction instruction = currentInstructionUnit.getInstruction();
         instruction.accept(this, heap);
-        programCounter++;
+        this.programCounter++;
       } else if (currentInstructionUnit.isReturnStatement()) {
         String returnVarName = currentInstructionUnit.getRuturnIdentifier();
         this.returnValueFromCalledFunction = heap.getMemoryBlockFromScope(this.peekFunctionStack(), returnVarName);
@@ -213,7 +213,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
     n.f0.accept(this, heap);
     n.f1.accept(this, heap);
     String errMessage = (String) n.f2.accept(this, heap);
-    // this.exitProgramWithErrorMessage(errMessage);
+    this.exitProgramWithErrorMessage(errMessage);
     n.f3.accept(this, heap);
     return null;
   }
@@ -223,7 +223,8 @@ class Executor extends GJDepthFirst<Object, Heap> {
     if (debug) Log.log("Visiting Goto");
     n.f0.accept(this, heap);
     String label = (String) n.f1.accept(this, heap);
-    List<InstructionUnit> goToInstructions = heap.getInstructionByLabel(this.peekFunctionStack(), label);
+    int gotoInstructionAddress = heap.getInstructionAddressByLabel(this.peekFunctionStack(), label);
+    this.setProgramCounter(gotoInstructionAddress - 1);
     return null;
   }
 
@@ -231,9 +232,18 @@ class Executor extends GJDepthFirst<Object, Heap> {
   public Object visit(IfGoto n, Heap heap) {
     if (debug) Log.log("Visiting IfGoto");
     n.f0.accept(this, heap);
-    n.f1.accept(this, heap);
+    String varName = (String) n.f1.accept(this, heap);
+    MemoryUnit memUnit= this.getMemoryUnitFromScope(heap, this.peekFunctionStack(), varName);
     n.f2.accept(this, heap);
-    n.f3.accept(this, heap);
+    String label = (String) n.f3.accept(this, heap);
+    if (!memUnit.isInt()) {
+      return null;
+    } else {
+      if (memUnit.getIntValue() == 0) {
+        int gotoInstructionAddress = heap.getInstructionAddressByLabel(this.peekFunctionStack(), label);
+        this.setProgramCounter(gotoInstructionAddress - 1);
+      }
+    }
     return null;
   }
 
@@ -260,6 +270,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
 
     this.executeInstructionUnderFunction(heap, calledFunctionName);
 
+    heap.destroyFunctionScope(this.peekFunctionStack());
     this.setProgramCounter(this.popFromProgramCounterStack());
     this.popFunctionStack();
 
@@ -295,6 +306,12 @@ class Executor extends GJDepthFirst<Object, Heap> {
   /** f0 -> <IDENTIFIER> */
   public Object visit(FunctionName n, Heap heap) {
     if (debug) Log.log("visiting function name");
+    n.f0.accept(this, heap);
+    return n.f0.toString();
+  }
+
+  public Object visit(Label n, Heap heap) {
+    if (debug) Log.log("visiting label");
     n.f0.accept(this, heap);
     return n.f0.toString();
   }
@@ -353,7 +370,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
     if (sizeVarMemUnit.getIntValue() % MemoryUnit.size != 0) {
       this.exitProgramWithErrorMessage("the size must be a multiple of " + MemoryUnit.size);
     }
-    return sizeVarMemUnit.getIntValue() / MemoryUnit.size;
+    return sizeVarMemUnit.getIntValue();
   }
 
   private void exitProgramWithErrorMessage(String message) {
@@ -373,8 +390,8 @@ class Executor extends GJDepthFirst<Object, Heap> {
   }
 
   private void moveVarValue(Heap heap, String assigneVarName, String valueVarName) {
-    MemoryUnit valueVarMemUnit = this.getMemoryUnitFromScope(heap, this.peekFunctionStack(), valueVarName);
-    this.putVarInMemory(heap, assigneVarName,new MemoryUnit(valueVarMemUnit.getValueImage(), valueVarMemUnit.getType()));
+    MemoryBlock valueMemBlock = this.getMemoryBlockFromScope(heap, this.peekFunctionStack(), valueVarName);
+    heap.updateMemoryBlockInScope(this.peekFunctionStack(), assigneVarName, valueMemBlock);
   }
 
   private void getValueFromBlockAndAssignToVar(Heap heap, String assigneeName, String valueVarName, String indexImage) {

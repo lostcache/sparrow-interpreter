@@ -3,22 +3,28 @@ import java.util.*;
 public class Heap {
   public static final int memBlockSize = 4;
   private Map<String, List<LabelledInstruction>> functionInstructions;
-  private Map<String, Scope> memory = null;
+  private Map<String, List<Scope>> memory = null;
   private Map<String, List<String>> funcParamMap = null;
 
   public Heap() {
-    this.memory = new HashMap<String, Scope>();
+    this.memory = new HashMap<String, List<Scope>>();
     this.functionInstructions = new HashMap<String, List<LabelledInstruction>>();
     this.funcParamMap = new HashMap<String, List<String>>();
   }
 
   public void addFunctionInstructions(
-      String functionName, List<LabelledInstruction> instructions) {
+    String functionName,
+    List<LabelledInstruction> instructions
+  ) {
     this.functionInstructions.put(functionName, instructions);
   }
 
   public void createNewFunctionScope(String functionName) {
-    memory.put(functionName, new Scope());
+    if (this.getScopeMemory(functionName) != null) {
+      this.addToExistingScope(functionName);
+    } else {
+      this.createNewScopeList(functionName);
+    }
   }
 
   public void addVarToScope(String functionName, String varName, MemoryBlock memBlock) {
@@ -41,14 +47,17 @@ public class Heap {
     scope.updateMemoryBlock(varName, memBlock);
   }
 
-  public List<InstructionUnit> getInstructionByLabel(String currentFunction, String desiredLabel) {
-    List <InstructionUnit> instructionsToReturn = new ArrayList<InstructionUnit>();
-    for (LabelledInstruction labelledInstruction : this.getInstructionsByFuncitonName(currentFunction)) {
+  public int getInstructionAddressByLabel(String currentFunction, String desiredLabel) {
+    int labelAddress = 0;
+    List<LabelledInstruction> functionInstruction = this.getInstructionsByFuncitonName(currentFunction);
+    for (int i = 0; i < functionInstruction.size(); i++) {
+      LabelledInstruction labelledInstruction = functionInstruction.get(i);
       if (labelledInstruction.getLabel().equals(desiredLabel)) {
-        instructionsToReturn.add(labelledInstruction.getInstructionUnit());
+        labelAddress = i;
+        break;
       }
     }
-    return instructionsToReturn;
+    return labelAddress;
   }
 
   public void debugInstructions() {
@@ -90,12 +99,38 @@ public class Heap {
     return this.funcParamMap.get(functionName);
   }
 
+  public List<LabelledInstruction> getInstructionsByFuncitonName(String functionName) {
+    return this.functionInstructions.get(functionName);
+  }
+
+  public void destroyFunctionScope(String functionName) {
+    List<Scope> currentScopeList = this.getScopeList(functionName);
+    currentScopeList.remove(currentScopeList.size() - 1);
+    this.memory.put(functionName, currentScopeList);
+  }
+
   private Scope getScopeMemory(String functionName) {
+    List<Scope> scopeList = this.memory.get(functionName);
+    if (scopeList == null) {
+      return null;
+    }
+    return scopeList.get(scopeList.size() - 1);
+  }
+
+  private List<Scope> getScopeList(String functionName) {
     return this.memory.get(functionName);
   }
 
-  public List<LabelledInstruction> getInstructionsByFuncitonName(String functionName) {
-    return this.functionInstructions.get(functionName);
+  private void addToExistingScope(String functionName) {
+      List<Scope> funScopeList = this.getScopeList(functionName);
+      funScopeList.add(new Scope());
+      this.memory.put(functionName, funScopeList);
+  }
+
+  private void createNewScopeList(String functionName) {
+    List<Scope> newScopeList = new ArrayList<Scope>();
+    newScopeList.add(new Scope());
+    this.memory.put(functionName, newScopeList);
   }
 }
 
