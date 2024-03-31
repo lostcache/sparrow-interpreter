@@ -26,9 +26,9 @@ public class Heap {
     }
   }
 
-  public void putVarInScope(String functionName, String varName, MemoryUnit memUnit) {
+  public void putVarInScope(String functionName, String varName, MemoryUnit memUnit, int size) {
     Scope scope = this.getScope(functionName);
-    scope.createVariable(varName, memUnit);
+    scope.createVariable(varName, memUnit, size);
   }
 
   public MemoryUnit getMemoryUnitFromScope(String functionName, String identifier) {
@@ -42,11 +42,11 @@ public class Heap {
   }
 
   public void allocateMemroy(String functionName, String identifier, int size) {
-    this.putVarInScope(functionName, identifier, new MemoryUnit("", VariableType.NULL));
+    this.putVarInScope(functionName, identifier, new MemoryUnit("", VariableType.NULL), size);
     Scope currentScope = this.getScope(functionName);
     MemoryAddress baseAddress = currentScope.getAddressOfIdentifier(identifier);
     for (int i = 0; i < size - 1; i++) {
-      currentScope.putValueinAddress(baseAddress.getIntValue() + MemoryUnit.size, new MemoryUnit("", VariableType.NULL));
+      currentScope.putValueInAddress(baseAddress.getIntValue() + (MemoryUnit.size * (i + 1)), new MemoryUnit("", VariableType.NULL));
     }
   }
 
@@ -54,7 +54,7 @@ public class Heap {
     Scope scope = this.getScope(functionName);
     MemoryAddress baseAddress = scope.getAddressOfIdentifier(baseIdentifier);
     int desiredAddress = baseAddress.getIntValue() + offset;
-    scope.putValueinAddress(desiredAddress, memUnit);
+    scope.putValueInAddress(desiredAddress, memUnit);
   }
 
   public void moveValueInScope(String functionName, String lhs, String rhs) {
