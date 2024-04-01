@@ -1,14 +1,16 @@
 class MemoryAddress {
   private int address = 0;
-  private String strValue = null;
 
   public MemoryAddress(int address) {
     this.address = address;
-    this.strValue = String.valueOf(address);
+  }
+
+  public MemoryAddress(String address) {
+    this.address = Integer.parseInt(address);
   }
 
   public String getStrValue() {
-    return new String(strValue);
+    return String.valueOf(this.address);
   }
 
   public int getIntValue() {

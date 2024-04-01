@@ -35,8 +35,12 @@ class MemoryUnit {
     return this.type;
   }
 
-  public boolean isEmpty() {
+  public boolean isNULL() {
     return this.valueImage.length() == 0 && this.type == VariableType.NULL;
+  }
+
+  public boolean isRef() {
+    return this.type == VariableType.REFERENCE;
   }
 
   private void unexpectedError(String message) {
