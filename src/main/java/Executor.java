@@ -268,7 +268,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
     String identifierValueImage = heap.fetchValueImage(this.peekFunctionStack(), identifier);
     n.f2.accept(this, heap);
     String label = (String) n.f3.accept(this, heap);
-    if (identifierValueImage == "0") {
+    if (identifierValueImage.equals("0")) {
       int gotoInstructionAddress = heap.getInstructionAddressByLabel(this.peekFunctionStack(), label);
       this.setProgramCounter(gotoInstructionAddress - 1);
     }
