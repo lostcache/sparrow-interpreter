@@ -40,7 +40,7 @@ class MemoryUnit {
   }
 
   public boolean isRef() {
-    return this.type == VariableType.REFERENCE;
+    return this.type == VariableType.POINTER;
   }
 
   private void unexpectedError(String message) {

@@ -1,7 +1,7 @@
 import java.util.*;
 
 class Scope {
-  private int addressStartValue = 0;
+  private int stackStartAddress = 0;
   private Map<String, MemoryAddress> identifierToAddressMap = null;
   private Map<String, MemoryUnit> memory = null;
   private Map<String, Integer> identifierSizeMap = null;
@@ -12,17 +12,8 @@ class Scope {
     this.identifierSizeMap = new HashMap<String, Integer>();
   }
 
-  public void putValueInArray(String lhs, String rhs, int offset) {
-    MemoryUnit lhsMemUnit = this.getMemoryUnitByIdentifier(lhs);
-    MemoryUnit rhsMemUnit = this.getMemoryUnitByIdentifier(rhs);
-    MemoryUnit unitToPutInArray = new MemoryUnit(rhsMemUnit.getValueImage(), rhsMemUnit.getType());
-    String arrayFirstUnitAddress = lhsMemUnit.getValueImage();
-    int desiredMemAddress = Integer.parseInt(arrayFirstUnitAddress) + offset;
-    this.memory.put(String.valueOf(desiredMemAddress), unitToPutInArray);
-  }
-
   public void putIdentifierInMemory(String identifier, MemoryUnit memUnit, int size) {
-    MemoryAddress address = new MemoryAddress(this.addressStartValue);
+    MemoryAddress address = new MemoryAddress(this.stackStartAddress);
     this.createAddressValuePair(address, memUnit);
     this.createIdentifierSizePair(identifier, size);
     this.createIdentifierAddressPair(identifier, address);
@@ -31,10 +22,6 @@ class Scope {
 
   public void moveIdentifiers(String lhs, String rhs) {
     MemoryUnit rhsMemUnit = this.getMemoryUnitByIdentifier(rhs);
-    if (rhsMemUnit.isRef()) {
-      String firstMemUnitAddr = rhsMemUnit.getValueImage();
-      rhsMemUnit = this.getMemoryUnitByAddress(firstMemUnitAddr);
-    }
     MemoryUnit lhsMemUnit = new MemoryUnit(rhsMemUnit.getValueImage(), rhsMemUnit.getType());
     if (this.identifierExists(lhs)) {
       this.updateMemUnitOfIdentifier(lhs, lhsMemUnit);
@@ -51,26 +38,6 @@ class Scope {
     return this.getDereferencedMemoryUnitByIdentifier(identifier);
   }
 
-  public void allocateMemory(String identifier, int size) {
-    MemoryAddress pointer = this.createMemoryBlockOfSize(size);
-    this.putIdentifierInMemory(
-      identifier,
-      new MemoryUnit(pointer.getStrValue(), VariableType.REFERENCE),
-      size
-    );
-  }
-
-  public MemoryUnit getValueFromArray(String identifier, int offset) {
-    MemoryUnit memUnit = this.getMemoryUnitByIdentifier(identifier);
-    if (!memUnit.isRef()) {
-      Log.log("trying to get value from non array ->" + identifier);
-      System.exit(1);
-    }
-    String firstMemUnitAddress = memUnit.getValueImage();
-    int desiredAddress = Integer.parseInt(firstMemUnitAddress) + offset;
-    return this.getMemoryUnitByAddress(String.valueOf(desiredAddress));
-  }
-
   public void updateMemUnitOfIdentifier(String identifier, MemoryUnit memUnit) {
     MemoryAddress memAddress = this.getAddressByIdentifier(identifier);
     this.memory.put(memAddress.getStrValue(), memUnit);
@@ -78,19 +45,6 @@ class Scope {
 
   public boolean identifierExists(String identifier) {
     return this.getMemoryUnitByIdentifier(identifier) != null;
-  }
-
-  private MemoryAddress createMemoryBlockOfSize(int size) {
-    MemoryAddress addressOfFirstUnit = null;
-    for (int i = 0; i < size; i++) {
-      MemoryAddress address = new MemoryAddress(this.addressStartValue);
-      if (i == 0) {
-        addressOfFirstUnit = address;
-      }
-      this.createAddressValuePair(address, new MemoryUnit("", VariableType.NULL));
-      this.incrementAddressStartValue();
-    }
-    return addressOfFirstUnit;
   }
 
   public int addIdentifiers(String op1, String op2) {
@@ -166,7 +120,7 @@ class Scope {
     this.identifierToAddressMap.put(identifier, address);
   }
 
-  private MemoryUnit getMemoryUnitByIdentifier(String identifier) {
+  public MemoryUnit getMemoryUnitByIdentifier(String identifier) {
     MemoryAddress memoryAddress = this.getAddressByIdentifier(identifier);
     if (memoryAddress == null) {
       return null;
@@ -186,12 +140,12 @@ class Scope {
     return this.memory.get(address);
   }
 
-  private int getSizeByIdentfier(String id) {
+  public int getSizeByIdentfier(String id) {
     return this.identifierSizeMap.get(id);
   }
 
   private void incrementAddressStartValue() {
-    this.addressStartValue += MemoryUnit.size;
+    this.stackStartAddress += MemoryUnit.size;
   }
 
   public void debugScopeMemory() {

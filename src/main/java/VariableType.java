@@ -2,6 +2,6 @@ enum VariableType {
   INTEGER,
   STRING,
   FUNCTION,
-  REFERENCE,
+  POINTER,
   NULL,
 }

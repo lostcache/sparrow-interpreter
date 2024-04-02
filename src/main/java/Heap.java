@@ -2,13 +2,38 @@ import java.util.*;
 
 public class Heap {
   private Map<String, List<LabelledInstruction>> functionInstructions;
-  private Map<String, List<Scope>> memory = null;
+  private Map<String, List<Scope>> stackMemory = null;
   private Map<String, List<String>> funcParamMap = null;
+  private Map<String, MemoryUnit> heapMemory = null;
+  private int heapStartAddress = 0;
 
   public Heap() {
-    this.memory = new HashMap<String, List<Scope>>();
+    this.stackMemory = new HashMap<String, List<Scope>>();
     this.functionInstructions = new HashMap<String, List<LabelledInstruction>>();
     this.funcParamMap = new HashMap<String, List<String>>();
+    this.heapMemory = new HashMap<String, MemoryUnit>();
+  }
+
+  private void putValueInHeap(MemoryUnit memUnit) {
+    this.heapMemory.put(String.valueOf(this.heapStartAddress), memUnit);
+    this.incrememtHeapStartAddress();
+  }
+
+  private void incrememtHeapStartAddress() {
+    this.heapStartAddress += MemoryUnit.size;
+  }
+
+  private void updateValueInHeap(String address, MemoryUnit memUnit) {
+    this.heapMemory.put(address, memUnit);
+  }
+
+  private MemoryUnit getMemoryUnit(String address) {
+    MemoryUnit memUnit = this.heapMemory.get(address);
+    if (memUnit == null) {
+      Log.log("no value at this address in heap");
+      System.exit(1);
+    }
+    return memUnit;
   }
 
   // all memory related methods 
@@ -39,7 +64,13 @@ public class Heap {
 
   public void allocateMemoryOfSize(String functionName, String identifier, int size) {
     Scope scope = this.getScope(functionName);
-    scope.allocateMemory(identifier, size);
+    String firstElementAddress = String.valueOf(this.heapStartAddress);
+    MemoryUnit pointer = new MemoryUnit(firstElementAddress, VariableType.POINTER);
+    for (int i = 0; i < size; i++) {
+      MemoryUnit memUnit = new MemoryUnit("", VariableType.NULL);
+      this.putValueInHeap(memUnit);
+    }
+    scope.putIdentifierInMemory(identifier, pointer, 1);
   }
 
   public MemoryUnit getDereferencedValue(String function, String identifier) {
@@ -57,9 +88,11 @@ public class Heap {
     scope.moveIdentifiers(lhs, rhs);
   }
 
-  public MemoryUnit getValueFromArray(String functionName, String identifier, int offset) {
-    Scope scope = this.getScope(functionName);
-    return scope.getValueFromArray(identifier, offset);
+  public MemoryUnit getValueFromArray(String function, String identifier, int offset) {
+    MemoryUnit pointer = this.getPointerFromScope(function, identifier);
+    String firstElementAddress = this.getPointedAddress(pointer);
+    int desiredMemAddress = Integer.parseInt(firstElementAddress) + offset;
+    return this.getMemoryUnit(String.valueOf(desiredMemAddress));
   }
 
   public void updateIdentifierValue(String functionName, String identifier, MemoryUnit memUnit) {
@@ -73,8 +106,39 @@ public class Heap {
   }
 
   public void putValueInArray(String function, String lhs, String rhs, int offset) {
+    MemoryUnit rhsMemUnit = this.getMemUnitFromScope(function, rhs);
+    MemoryUnit pointer = this.getPointerFromScope(function, lhs);
+    String firstElementAddress = this.getPointedAddress(pointer);
+    int desiredMemAddress = Integer.parseInt(firstElementAddress) + offset;
+    this.updateValueInHeap(String.valueOf(desiredMemAddress), new MemoryUnit(rhsMemUnit.getValueImage(), rhsMemUnit.getType()));
+  }
+
+  private MemoryUnit getMemUnitFromScope(String function, String identifier) {
     Scope scope = this.getScope(function);
-    scope.putValueInArray(lhs, rhs, offset);
+    return scope.getMemoryUnitByIdentifier(identifier);
+  }
+
+  private MemoryUnit getPointerFromScope(String function, String identifier) {
+    Scope scope = this.getScope(function);
+    MemoryUnit pointer = scope.getMemoryUnitByIdentifier(identifier);
+    if (pointer == null) {
+      Log.log("pointer does not exist in scope");
+      System.exit(1);
+    }
+    return pointer;
+  }
+
+  private String getPointedAddress(MemoryUnit pointer) {
+    if (!pointer.isRef()) {
+      Log.log("cannot get address value from non pointer");
+      System.exit(1);
+    }
+    return pointer.getValueImage();
+  }
+
+  public List<MemoryUnit> getArrayValues(String function, String identifier) {
+    Scope scope = this.getScope(function);
+    return scope.getArrayValues(identifier);
   }
 
   // all instruction related methods
@@ -121,11 +185,11 @@ public class Heap {
   public void destroyFunctionScope(String functionName) {
     List<Scope> currentScopeList = this.getScopeList(functionName);
     currentScopeList.remove(currentScopeList.size() - 1);
-    this.memory.put(functionName, currentScopeList);
+    this.stackMemory.put(functionName, currentScopeList);
   }
 
   private Scope getScope(String functionName) {
-    List<Scope> scopeList = this.memory.get(functionName);
+    List<Scope> scopeList = this.stackMemory.get(functionName);
     if (scopeList == null) {
       return null;
     }
@@ -133,24 +197,24 @@ public class Heap {
   }
 
   private List<Scope> getScopeList(String functionName) {
-    return this.memory.get(functionName);
+    return this.stackMemory.get(functionName);
   }
 
   private void addToExistingScope(String functionName) {
       List<Scope> funScopeList = this.getScopeList(functionName);
       funScopeList.add(new Scope());
-      this.memory.put(functionName, funScopeList);
+      this.stackMemory.put(functionName, funScopeList);
   }
 
   private void createNewScopeList(String functionName) {
     List<Scope> newScopeList = new ArrayList<Scope>();
     newScopeList.add(new Scope());
-    this.memory.put(functionName, newScopeList);
+    this.stackMemory.put(functionName, newScopeList);
   }
 
   public void debugMemory() {
     Log.log("debugging memory ----------------->");
-    for (String functionName : this.memory.keySet()) {
+    for (String functionName : this.stackMemory.keySet()) {
       Log.log("current scope name -> " + functionName);
       Scope scope = this.getScope(functionName);
       scope.debugScopeMemory();
