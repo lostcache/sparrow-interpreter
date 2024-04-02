@@ -34,10 +34,6 @@ class Scope {
     return this.getMemoryUnitByIdentifier(identifier).getValueImage();
   }
 
-  public MemoryUnit getDereferencedValue(String identifier) {
-    return this.getDereferencedMemoryUnitByIdentifier(identifier);
-  }
-
   public void updateMemUnitOfIdentifier(String identifier, MemoryUnit memUnit) {
     MemoryAddress memAddress = this.getAddressByIdentifier(identifier);
     this.memory.put(memAddress.getStrValue(), memUnit);
@@ -48,8 +44,8 @@ class Scope {
   }
 
   public int addIdentifiers(String op1, String op2) {
-    MemoryUnit op1MemUnit = this.getDereferencedMemoryUnitByIdentifier(op1);
-    MemoryUnit op2MemUnit = this.getDereferencedMemoryUnitByIdentifier(op2);
+    MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
+    MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);
     if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
       Log.log("operands must be int to be added");
       System.exit(1);
@@ -58,8 +54,8 @@ class Scope {
   }
 
   public int subtractIdentifiers(String op1, String op2) {
-    MemoryUnit op1MemUnit = this.getDereferencedMemoryUnitByIdentifier(op1);
-    MemoryUnit op2MemUnit = this.getDereferencedMemoryUnitByIdentifier(op2);
+    MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
+    MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);
     if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
       Log.log("operands must be int to be subtracted");
       System.exit(1);
@@ -68,8 +64,8 @@ class Scope {
   }
 
   public int multiplyIdentifiers(String op1, String op2) {
-    MemoryUnit op1MemUnit = this.getDereferencedMemoryUnitByIdentifier(op1);
-    MemoryUnit op2MemUnit = this.getDereferencedMemoryUnitByIdentifier(op2);
+    MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
+    MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);
     if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
       Log.log("operands must be int to be multiplied");
       System.exit(1);
@@ -78,8 +74,8 @@ class Scope {
   }
 
   public int compareIdentifiers(String op1, String op2) {
-    MemoryUnit op1MemUnit = this.getDereferencedMemoryUnitByIdentifier(op1);
-    MemoryUnit op2MemUnit = this.getDereferencedMemoryUnitByIdentifier(op2);
+    MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
+    MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);
     if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
       Log.log("operands must be int to be compared");
       System.exit(1);
@@ -89,23 +85,6 @@ class Scope {
     } else {
       return 0;
     }
-  }
-
-  private MemoryUnit getDereferencedMemoryUnitByIdentifier(String id) {
-    MemoryUnit memUnit = this.getMemoryUnitByIdentifier(id);
-    if (!memUnit.isRef()) {
-      return memUnit;
-    }
-    return dereferenceMemoryUnit(memUnit);
-  }
-
-  private MemoryUnit dereferenceMemoryUnit(MemoryUnit memUnit) {
-    MemoryUnit memUnitToReturn = memUnit;
-    while (memUnitToReturn.isRef()) {
-      String addrString = memUnitToReturn.getValueImage();
-      memUnitToReturn  = this.getMemoryUnitByAddress(addrString);
-    }
-    return memUnitToReturn;
   }
 
   private void createIdentifierSizePair(String identifier, int size) {
@@ -179,7 +158,7 @@ class Scope {
     return memUnitToReturn;
   }
 
-  private int getIdentifierSize(String identifier) {
+  public int getIdentifierSize(String identifier) {
     return this.identifierSizeMap.get(identifier);
   }
 }

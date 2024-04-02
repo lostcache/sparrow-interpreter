@@ -4,6 +4,7 @@ import java.util.*;
 class Executor extends GJDepthFirst<Object, Heap> {
   private static final boolean debug = false;
   private List<MemoryUnit> calledFunctionParams = null;
+  private List<String> calledFuncParamsIdentifiers = null;
   private MemoryUnit returnValueFromCalledFunction = null;
   private List<String> functionCallStack = new ArrayList<String>();
   private int programCounter = 0;
@@ -28,9 +29,9 @@ class Executor extends GJDepthFirst<Object, Heap> {
         Instruction instruction = currentInstructionUnit.getInstruction();
         instruction.accept(this, heap);
         this.programCounter++;
-        // Log.log("-----------------------");
-        // heap.debugMemory();
-        // Log.log("-----------------------");
+        Log.log("-----------------------");
+        heap.debugMemory();
+        Log.log("-----------------------");
       } else if (currentInstructionUnit.isReturnStatement()) {
         String returnVarName = currentInstructionUnit.getRuturnIdentifier();
         this.returnValueFromCalledFunction = heap.getDereferencedValue(this.peekFunctionStack(), returnVarName);
@@ -292,7 +293,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
     n.f5.accept(this, heap);
 
     this.initCalledFunctionParams();
-    this.rememberParamsValuesOfCalledFunc(heap, n.f5.nodes);
+    this.rememberCalledParamValues(heap, n.f5.nodes);
 
     n.f6.accept(this, heap);
 
@@ -344,11 +345,12 @@ class Executor extends GJDepthFirst<Object, Heap> {
     return n.f0.toString();
   }
 
-  private void rememberParamsValuesOfCalledFunc(Heap heap, List<Node> params) {
+  private void rememberCalledParamValues(Heap heap, List<Node> params) {
     for (Node param : params) {
-      String paramVarName = (String) param.accept(this, heap);
-      MemoryUnit paramMemUnit = heap.getDereferencedValue(this.peekFunctionStack(), paramVarName);
+      String paramIdentifier = (String) param.accept(this, heap);
+      MemoryUnit paramMemUnit = heap.getMemUnitFromScope(this.peekFunctionStack(), paramIdentifier);
       this.calledFunctionParams.add(paramMemUnit);
+      this.calledFuncParamsIdentifiers.add(paramIdentifier);
     }
   }
 
@@ -366,10 +368,12 @@ class Executor extends GJDepthFirst<Object, Heap> {
 
   private void initCalledFunctionParams() {
     this.calledFunctionParams = new ArrayList<MemoryUnit>();
+    this.calledFuncParamsIdentifiers = new ArrayList<String>();
   }
 
   private void resetCalledFunctionParams() {
     this.calledFunctionParams = null;
+    this.calledFuncParamsIdentifiers = null;
   }
 
   private int validateAndGetSizeVariableValue(Heap heap, String varName) {
@@ -389,11 +393,13 @@ class Executor extends GJDepthFirst<Object, Heap> {
   }
 
   private void mapCalledParamsToFuncParams(Heap heap, String calledFunctionName) {
-    List<String> funcParams = heap.getFumParams(calledFunctionName);
-    for (int i = 0; i < funcParams.size(); i++) {
-      String paramName = funcParams.get(i);
+    List<String> declaredParams = heap.getFunDeclaredParamIdentifiers(calledFunctionName);
+    for (int i = 0; i < declaredParams.size(); i++) {
+      String declaredParamIdentifier = declaredParams.get(i);
+      String calledParamIdentifier = this.calledFuncParamsIdentifiers.get(i);
       MemoryUnit paramMemUnit = this.calledFunctionParams.get(i);
-      heap.putIdentifierInScopeMemory(this.peekFunctionStack(), paramName, new MemoryUnit(paramMemUnit.getValueImage(), paramMemUnit.getType()), 1);
+      int calledParamSize = heap.getIdentifierSize(this.functionCallStack.get(this.functionCallStack.size() - 2), calledParamIdentifier);
+      heap.putIdentifierInScopeMemory(this.peekFunctionStack(), declaredParamIdentifier, new MemoryUnit(paramMemUnit.getValueImage(), paramMemUnit.getType()), calledParamSize);
     }
   }
 

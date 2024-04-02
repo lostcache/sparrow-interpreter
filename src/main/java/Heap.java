@@ -3,14 +3,14 @@ import java.util.*;
 public class Heap {
   private Map<String, List<LabelledInstruction>> functionInstructions;
   private Map<String, List<Scope>> stackMemory = null;
-  private Map<String, List<String>> funcParamMap = null;
+  private Map<String, List<String>> functionDeclaredParamsIdentifiers = null;
   private Map<String, MemoryUnit> heapMemory = null;
   private int heapStartAddress = 0;
 
   public Heap() {
     this.stackMemory = new HashMap<String, List<Scope>>();
     this.functionInstructions = new HashMap<String, List<LabelledInstruction>>();
-    this.funcParamMap = new HashMap<String, List<String>>();
+    this.functionDeclaredParamsIdentifiers = new HashMap<String, List<String>>();
     this.heapMemory = new HashMap<String, MemoryUnit>();
   }
 
@@ -113,7 +113,7 @@ public class Heap {
     this.updateValueInHeap(String.valueOf(desiredMemAddress), new MemoryUnit(rhsMemUnit.getValueImage(), rhsMemUnit.getType()));
   }
 
-  private MemoryUnit getMemUnitFromScope(String function, String identifier) {
+  public MemoryUnit getMemUnitFromScope(String function, String identifier) {
     Scope scope = this.getScope(function);
     return scope.getMemoryUnitByIdentifier(identifier);
   }
@@ -136,9 +136,9 @@ public class Heap {
     return pointer.getValueImage();
   }
 
-  public List<MemoryUnit> getArrayValues(String function, String identifier) {
+  public int getIdentifierSize(String function, String identifier) {
     Scope scope = this.getScope(function);
-    return scope.getArrayValues(identifier);
+    return scope.getIdentifierSize(identifier);
   }
 
   // all instruction related methods
@@ -171,11 +171,11 @@ public class Heap {
   }
 
   public void rememberFunParams(String functionName, List<String> params) {
-    this.funcParamMap.put(functionName, params);
+    this.functionDeclaredParamsIdentifiers.put(functionName, params);
   }
 
-  public List<String> getFumParams(String functionName) {
-    return this.funcParamMap.get(functionName);
+  public List<String> getFunDeclaredParamIdentifiers(String functionName) {
+    return this.functionDeclaredParamsIdentifiers.get(functionName);
   }
 
   public List<LabelledInstruction> getInstructionsByFuncitonName(String functionName) {
@@ -223,9 +223,9 @@ public class Heap {
 
   public void debugFunctionParams() {
     Log.log("Debugging funciton params ----------------->");
-    for (String functionName : this.funcParamMap.keySet()) {
+    for (String functionName : this.functionDeclaredParamsIdentifiers.keySet()) {
       Log.log("function -> " + functionName);
-      for (String paramName : this.funcParamMap.get(functionName)) {
+      for (String paramName : this.functionDeclaredParamsIdentifiers.get(functionName)) {
         Log.log("param -> " + paramName);
       }
     }
