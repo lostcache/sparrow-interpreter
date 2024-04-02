@@ -5,7 +5,7 @@ public class Heap {
   private Map<String, List<Scope>> stackMemory = null;
   private Map<String, List<String>> functionDeclaredParamsIdentifiers = null;
   private Map<String, MemoryUnit> heapMemory = null;
-  private int heapStartAddress = 0;
+  private int heapStartAddress = 4;
 
   public Heap() {
     this.stackMemory = new HashMap<String, List<Scope>>();

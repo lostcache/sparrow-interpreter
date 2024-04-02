@@ -1,7 +1,7 @@
 import java.util.*;
 
 class Scope {
-  private int stackStartAddress = 0;
+  private int stackStartAddress = 4;
   private Map<String, MemoryAddress> identifierToAddressMap = null;
   private Map<String, MemoryUnit> memory = null;
   private Map<String, Integer> identifierSizeMap = null;
