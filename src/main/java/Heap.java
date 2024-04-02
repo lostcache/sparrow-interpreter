@@ -73,11 +73,6 @@ public class Heap {
     scope.putIdentifierInMemory(identifier, pointer, 1);
   }
 
-  public MemoryUnit getDereferencedValue(String function, String identifier) {
-    Scope scope = this.getScope(function);
-    return scope.getDereferencedValue(identifier);
-  }
-
   public String fetchValueImage(String function, String identifier) {
     Scope scope = this.getScope(function);
     return scope.fetchValueImage(identifier);

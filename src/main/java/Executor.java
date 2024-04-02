@@ -355,7 +355,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
   }
 
   private void checkIfCalledVarIsFunc(Heap heap, String varName) {
-    MemoryUnit calledVarMemUnit = heap.getDereferencedValue(this.peekFunctionStack(), varName);
+    MemoryUnit calledVarMemUnit = heap.getMemUnitFromScope(this.peekFunctionStack(), varName);
     if (!calledVarMemUnit.isFunc()) {
       this.exitWithExecutionError("the var called does not represent a function");
     }
@@ -377,14 +377,12 @@ class Executor extends GJDepthFirst<Object, Heap> {
   }
 
   private int validateAndGetSizeVariableValue(Heap heap, String varName) {
-    MemoryUnit sizeVarMemUnit = heap.getDereferencedValue(this.peekFunctionStack(), varName);
-    if (!sizeVarMemUnit.isInt()) {
-      this.exitWithExecutionError("the size var is not an int");
-    }
-    if (sizeVarMemUnit.getIntValue() % MemoryUnit.size != 0) {
+    MemoryUnit sizeVarMemUnit = heap.getMemUnitFromScope(this.peekFunctionStack(), varName);
+    int size = sizeVarMemUnit.getIntValue();
+    if (size % MemoryUnit.size != 0) {
       this.exitProgramWithErrorMessage("the size must be a multiple of " + MemoryUnit.size);
     }
-    return sizeVarMemUnit.getIntValue();
+    return size;
   }
 
   private void exitProgramWithErrorMessage(String message) {
