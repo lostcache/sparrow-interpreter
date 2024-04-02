@@ -188,6 +188,9 @@ public class Heap {
     if (scopeList == null) {
       return null;
     }
+    if (scopeList.size() == 0) {
+      return null;
+    }
     return scopeList.get(scopeList.size() - 1);
   }
 
