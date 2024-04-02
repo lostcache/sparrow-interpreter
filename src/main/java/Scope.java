@@ -43,16 +43,6 @@ class Scope {
     return this.getMemoryUnitByIdentifier(identifier) != null;
   }
 
-  public int addIdentifiers(String op1, String op2) {
-    MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
-    MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);
-    if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
-      Log.log("operands must be int to be added");
-      System.exit(1);
-    }
-    return op1MemUnit.getIntValue() + op2MemUnit.getIntValue();
-  }
-
   public int subtractIdentifiers(String op1, String op2) {
     MemoryUnit op1MemUnit = this.getMemoryUnitByIdentifier(op1);
     MemoryUnit op2MemUnit = this.getMemoryUnitByIdentifier(op2);

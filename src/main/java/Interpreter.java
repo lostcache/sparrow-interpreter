@@ -1,6 +1,5 @@
 import java.io.InputStream;
 import syntaxtree.*;
-import visitor.*;
 
 public class Interpreter {
   public static void main(String[] args) throws ParseException {

@@ -99,8 +99,7 @@ class Executor extends GJDepthFirst<Object, Heap> {
     String op1 = (String) n.f2.accept(this, heap);
     n.f3.accept(this, heap);
     String op2 = (String) n.f4.accept(this, heap);
-    int result = heap.addIdentifiers(this.peekFunctionStack(), op1, op2);
-    MemoryUnit lhsMemUnit = new MemoryUnit(String.valueOf(result), VariableType.INTEGER);
+    MemoryUnit lhsMemUnit = heap.addIdentifiers(this.peekFunctionStack(), op1, op2);
     if (heap.identifierExists(this.peekFunctionStack(), lhs)) {
       heap.updateIdentifierValue(this.peekFunctionStack(), lhs, lhsMemUnit);
     } else {
