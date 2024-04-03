@@ -46,29 +46,15 @@ public class Heap {
     Scope scope = this.getScope(function);
     MemoryUnit op1MemUnit = scope.getMemoryUnitByIdentifier(op1);
     MemoryUnit op2MemUnit = scope.getMemoryUnitByIdentifier(op2);
-    String resultValueImage = null;
+    int result;
     VariableType resultType = null;
     if (op1MemUnit.isRef()) {
-      String addressOfValue = op1MemUnit.getValueImage();
-      op1MemUnit = this.getMemoryUnit(addressOfValue);
-      if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
-        Log.log("operands must be int to be added");
-        System.exit(1);
-      }
-      int result = op1MemUnit.getIntValue() + op2MemUnit.getIntValue();
-      resultValueImage = String.valueOf(this.heapStartAddress);
       resultType = VariableType.POINTER;
-      this.putValueInHeap(new MemoryUnit(String.valueOf(result), VariableType.INTEGER));
     } else {
-      if (!op1MemUnit.isInt() || !op2MemUnit.isInt()) {
-        Log.log("operands must be int to be added");
-        System.exit(1);
-      }
-      int result = op1MemUnit.getIntValue() + op2MemUnit.getIntValue();
-      resultValueImage = String.valueOf(result);
       resultType = VariableType.INTEGER;
     }
-    return new MemoryUnit(resultValueImage, resultType);
+    result = Integer.parseInt(op1MemUnit.getValueImage()) + Integer.parseInt(op2MemUnit.getValueImage());
+    return new MemoryUnit(String.valueOf(result), resultType);
   }
 
   public int subtractIdentifiers(String function, String op1, String op2) {
