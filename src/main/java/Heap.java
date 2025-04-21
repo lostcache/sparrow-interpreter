@@ -77,7 +77,7 @@ public class Heap {
     String firstElementAddress = String.valueOf(this.heapStartAddress);
     MemoryUnit pointer = new MemoryUnit(firstElementAddress, VariableType.POINTER);
     for (int i = 0; i < size; i++) {
-      MemoryUnit memUnit = new MemoryUnit("", VariableType.NULL);
+      MemoryUnit memUnit = new MemoryUnit("0", VariableType.INTEGER);
       this.putValueInHeap(memUnit);
     }
     scope.putIdentifierInMemory(identifier, pointer, 1);
