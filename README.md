@@ -8,8 +8,6 @@ A Java-based interpreter for the **Sparrow** intermediate representation languag
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Building](#building)
-  - [Running](#running)
 - [Sparrow Language](#sparrow-language)
   - [Syntax](#syntax)
   - [Instructions](#instructions)
@@ -19,7 +17,6 @@ A Java-based interpreter for the **Sparrow** intermediate representation languag
   - [Execution Flow](#execution-flow)
   - [Memory Model](#memory-model)
 - [Project Structure](#project-structure)
-- [Testing](#testing)
 - [Development](#development)
 
 ## Overview
@@ -50,33 +47,6 @@ This project was developed as part of CMSI-585 (Compiler Construction).
 - Java 8 (JavaSE-1.8) or higher
 - JavaCC (included in `misc/javacc.jar`)
 - Pre-compiled parser (`lib/sparrow-parser.jar`)
-
-### Building
-
-Compile the interpreter:
-
-```bash
-javac -sourcepath src -cp "lib/sparrow-parser.jar" src/main/java/Interpreter.java -d classes
-```
-
-### Running
-
-Execute a Sparrow program:
-
-```bash
-java -cp "classes:lib/sparrow-parser.jar" Interpreter < program.sparrow
-```
-
-Example with the factorial test case:
-
-```bash
-java -cp "classes:lib/sparrow-parser.jar" Interpreter < testcases/hw3/Factorial.sparrow
-```
-
-Output:
-```
-720
-```
 
 ## Sparrow Language
 
@@ -281,10 +251,6 @@ sparrow-interpreter/
 ├── grade.sh                    # Grading script
 └── gradle.properties           # Build configuration
 ```
-
-## Testing
-
-Test cases are located in `testcases/hw3/`. Each test has a corresponding `.out` file with expected output.
 
 ### Available Tests
 
