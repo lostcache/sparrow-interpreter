@@ -2,23 +2,6 @@
 
 A Java-based interpreter for the **Sparrow** intermediate representation language - a low-level, assembly-like language designed for educational purposes in compiler construction.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-- [Sparrow Language](#sparrow-language)
-  - [Syntax](#syntax)
-  - [Instructions](#instructions)
-  - [Example Program](#example-program)
-- [Architecture](#architecture)
-  - [Components](#components)
-  - [Execution Flow](#execution-flow)
-  - [Memory Model](#memory-model)
-- [Project Structure](#project-structure)
-- [Development](#development)
-
 ## Overview
 
 The Sparrow interpreter is a two-pass execution engine that processes intermediate representation code. It simulates a runtime environment with:
@@ -210,48 +193,6 @@ w0 = alloc(v0)      // Allocate 4 bytes on heap
 w1 = [w0 + 0]       // Load value from w0 into w1
 ```
 
-## Project Structure
-
-```
-sparrow-interpreter/
-├── src/
-│   ├── main/java/              # Core interpreter implementation
-│   │   ├── Interpreter.java    # Entry point
-│   │   ├── Executor.java       # Execution engine (Pass 2)
-│   │   ├── LabelledInstructionGatherer.java  # Preprocessing (Pass 1)
-│   │   ├── Heap.java           # Memory & metadata manager
-│   │   ├── Scope.java          # Function call frames
-│   │   ├── MemoryUnit.java     # Variable container
-│   │   ├── VariableType.java   # Type system
-│   │   ├── LabelledInstruction.java
-│   │   ├── InstructionUnit.java
-│   │   ├── GJDepthFirst.java   # Visitor base class
-│   │   └── Log.java            # Logging utility
-│   ├── parse/java/
-│   │   ├── SparrowParser.java  # Generated parser
-│   │   └── syntaxtree/         # Generated AST node classes
-│   └── test/java/
-│       └── MainTest.java       # Unit tests
-├── lib/
-│   ├── sparrow-parser.jar      # Pre-compiled parser
-│   └── tinyjava-parser.jar     # For other assignments
-├── misc/
-│   ├── sparrow.jj              # Sparrow grammar (JavaCC)
-│   ├── javacc.jar              # Parser generator
-│   ├── jtb.jar                 # Tree builder
-│   └── JavaSecurityPolicy.policy
-├── testcases/
-│   └── hw3/                    # Interpreter test cases
-│       ├── Factorial.sparrow
-│       ├── QuickSort.sparrow
-│       ├── ManyCalls.sparrow
-│       ├── CalleeSave.sparrow
-│       ├── ManyArgs2.sparrow
-│       └── strech.sparrow
-├── grade.sh                    # Grading script
-└── gradle.properties           # Build configuration
-```
-
 ### Available Tests
 
 1. **Factorial.sparrow** - Recursive factorial with OO-style method calls
@@ -261,25 +202,6 @@ sparrow-interpreter/
 5. **ManyArgs2.sparrow** - Function calls with many arguments
 6. **strech.sparrow** - Stress test for complex scenarios
 
-### Running Tests
-
-Individual test:
-```bash
-java -cp "classes:lib/sparrow-parser.jar" Interpreter < testcases/hw3/Factorial.sparrow
-```
-
-Compare with expected output:
-```bash
-java -cp "classes:lib/sparrow-parser.jar" Interpreter < testcases/hw3/Factorial.sparrow | diff - testcases/hw3/Factorial.sparrow.out
-```
-
-Run grading script (if configured):
-```bash
-./grade.sh
-```
-
-## Development
-
 ### Grammar
 
 The Sparrow grammar is defined in `misc/sparrow.jj` (JavaCC format). To regenerate the parser:
@@ -288,14 +210,6 @@ The Sparrow grammar is defined in `misc/sparrow.jj` (JavaCC format). To regenera
 2. Run JavaCC: `java -jar misc/javacc.jar misc/sparrow.jj`
 3. Run JTB: `java -jar misc/jtb.jar misc/sparrow.jj`
 4. Compile generated files into `lib/sparrow-parser.jar`
-
-### Debugging
-
-Enable debug logging by setting `debug = true` in:
-- `Executor.java:5`
-- `LabelledInstructionGatherer.java`
-
-This will print detailed execution traces.
 
 ### Notable Implementation Details
 
