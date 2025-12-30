@@ -29,7 +29,8 @@ This project was developed as part of CMSI-585 (Compiler Construction).
 
 - Java 8 (JavaSE-1.8) or higher
 - JavaCC (included in `misc/javacc.jar`)
-- Pre-compiled parser (`lib/sparrow-parser.jar`)
+- JTB (Java Tree Builder, included in `misc/jtb.jar`)
+- Parser source code (in `src/parse/java/`)
 
 ## Sparrow Language
 
@@ -119,7 +120,7 @@ Output: `720` (6! = 720)
 │                    (Entry Point)                          │
 └───────────────┬─────────────────────────────────────────────┘
                 │
-                ├──> SparrowParser.java (from sparrow-parser.jar)
+                ├──> SparrowParser.java (src/parse/java/SparrowParser.java)
                 │    Parses input → Abstract Syntax Tree (AST)
                 │
                 ├──> Heap.java
@@ -141,7 +142,7 @@ Output: `720` (6! = 720)
 **Key Classes:**
 
 - **`Interpreter.java`**: Entry point that orchestrates parsing and execution (located at `src/main/java/Interpreter.java`)
-- **`Executor.java`**: Instruction execution engine with visitor pattern (`src/main/java/Executor.java:4`)
+- **`Executor.java`**: Instruction execution engine with visitor pattern (`src/main/java/Executor.java`)
 - **`LabelledInstructionGatherer.java`**: Preprocessing pass to build execution metadata
 - **`Heap.java`**: Central memory and metadata manager
 - **`Scope.java`**: Represents a function's call frame with local variables
@@ -207,9 +208,9 @@ w1 = [w0 + 0]       // Load value from w0 into w1
 The Sparrow grammar is defined in `misc/sparrow.jj` (JavaCC format). To regenerate the parser:
 
 1. Modify `misc/sparrow.jj`
-2. Run JavaCC: `java -jar misc/javacc.jar misc/sparrow.jj`
-3. Run JTB: `java -jar misc/jtb.jar misc/sparrow.jj`
-4. Compile generated files into `lib/sparrow-parser.jar`
+2. Run JTB to generate syntax tree classes: `java -jar misc/jtb.jar misc/sparrow.jj`
+3. Run JavaCC on the JTB output: `java -jar misc/javacc.jar misc/sparrow.jj`
+4. Generated files will be placed in `src/parse/java/` and `syntaxtree/`
 
 ### Notable Implementation Details
 
