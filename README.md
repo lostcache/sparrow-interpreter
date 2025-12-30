@@ -115,8 +115,8 @@ Output: `720` (6! = 720)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Interpreter.java                          │
-│                    (Entry Point)                             │
+│                    Interpreter.java                       │
+│                    (Entry Point)                          │
 └───────────────┬─────────────────────────────────────────────┘
                 │
                 ├──> SparrowParser.java (from sparrow-parser.jar)
